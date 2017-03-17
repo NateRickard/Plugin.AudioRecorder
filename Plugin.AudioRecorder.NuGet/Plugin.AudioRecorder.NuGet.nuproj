@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{456390A2-0622-460A-B2F7-2FBD4A9BA868}</ProjectGuid>
+    <Description>Multiplatform library for recording microphone input</Description>
+    <PackageId>Plugin.AudioRecorder</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Nate Rickard</Authors>
+    <DevelopmentDependency>false</DevelopmentDependency>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Plugin.AudioRecorder</RootNamespace>
+    <UsePartialTypes>false</UsePartialTypes>
+    <AssemblyName>Plugin.AudioRecorder.NuGet</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Owners>Nate Rickard</Owners>
+    <PackageTags>xamarin, pcl, xam.pcl, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios, mac, microphone</PackageTags>
+    <Title>AudioRecorder plugin for Xamarin and Windows</Title>
+    <Summary>AudioRecorder plugin for Xamarin and Windows</Summary>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <OutputPath>bin\Debug</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Plugin.AudioRecorder.Android\Plugin.AudioRecorder.Android.csproj">
+      <Project>{26645807-54DF-4803-AB7F-C9D39E84120F}</Project>
+      <Name>Plugin.AudioRecorder.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Plugin.AudioRecorder.iOS\Plugin.AudioRecorder.iOS.csproj">
+      <Project>{89B77E69-9F7F-4300-9C9F-0A55D34EAFFB}</Project>
+      <Name>Plugin.AudioRecorder.iOS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ReferenceAssemblyFramework Include=".NETPortable,Version=v4.5,Profile=Profile111" />
+    <ReferenceAssemblyFramework Include=".NETPortable,Version=v4.5,Profile=Profile111" />
+  </ItemGroup>
+  <PropertyGroup>
+      <IntersectionAssemblyReferencePath>/Library/Frameworks/Xamarin.Android.framework/Versions/Current/lib/xbuild-frameworks/MonoAndroid/v7.1</IntersectionAssemblyReferencePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NuGet.Build.Packaging">
+      <Version>0.1.231</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
+  <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets')" />
+</Project>
