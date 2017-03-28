@@ -1,10 +1,11 @@
 ﻿using System;
 using AudioToolbox;
+using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
-	public class AudioStream
-	{
+	public class AudioStream : IAudioStream
+    {
 		const int DefaultBufferSize = 640;
 
 		InputAudioQueue audioQueue;
@@ -43,7 +44,7 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		/// <value>
 		/// The channel count.
-		/// </value>        
+		/// </value>
 		public int ChannelCount {
 			get {
 				return 1;
@@ -61,42 +62,73 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		public bool Start ()
-		{
-			var success = this.audioQueue.Start () == AudioQueueStatus.Ok;
-
-			if (success)
-			{
-				OnActiveChanged?.Invoke (this, true);
-			}
-
-			return success;
-		}
-
-
-		public void Stop ()
-		{
-			this.audioQueue.Stop (true);
-			OnActiveChanged?.Invoke (this, false);
-		}
-
-
+        /// <summary>
+        /// Gets a value indicating if the audio stream is active.
+        /// </summary>
 		public bool Active {
-			get {
-				return this.audioQueue.IsRunning;
-			}
+            get {
+                return this.audioQueue.IsRunning;
+            }
+        }
+
+
+        /// <summary>
+        /// Starts the audio stream.
+        /// </summary>
+		public Task Start()
+        {
+            try
+            {
+                if (!Active)
+                {
+                    var result = audioQueue.Start();
+
+                    if (result == AudioQueueStatus.Ok)
+                    {
+                        OnActiveChanged?.Invoke(this, true);
+                    }
+                    else
+                    {
+                        throw new Exception($"audioQueue.Start() returned non-OK status: {result}");
+                    }
+                }
+
+                return Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error in AudioStream.Start(): {0}", ex);
+                throw;
+            }
 		}
 
 
+        /// <summary>
+        /// Stops the audio stream.
+        /// </summary>
+		public Task Stop ()
+		{
+			audioQueue.Stop (true);
+			OnActiveChanged?.Invoke (this, false);
+
+            return Task.FromResult(true);
+		}
+
+
+        /// <summary>
+		/// Initializes a new instance of the <see cref="AudioStream"/> class.
+		/// </summary>
+		/// <param name="sampleRate">Sample rate.</param>
+		/// <param name="bufferSize">The buffer size used to read from the stream.  This can typically be left to the default.</param>
 		public AudioStream (int sampleRate, int bufferSize = DefaultBufferSize)
 		{
-			this.SampleRate = sampleRate;
+			SampleRate = sampleRate;
 			this.bufferSize = bufferSize;
-			this.Init ();
+			init ();
 		}
 
 
-		void Init ()
+		void init ()
 		{
 			var audioFormat = new AudioStreamBasicDescription
 			{
