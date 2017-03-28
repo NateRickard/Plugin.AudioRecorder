@@ -4,8 +4,8 @@ using Android.Media;
 
 namespace Plugin.AudioRecorder
 {
-	public class AudioStream
-	{
+	public class AudioStream : IAudioStream
+    {
 		readonly int bufferSize;
 		ChannelIn channels = ChannelIn.Mono;
 		Encoding audioFormat = Encoding.Pcm16bit;
@@ -78,6 +78,9 @@ namespace Plugin.AudioRecorder
 		}
 
 
+        /// <summary>
+        /// Gets a value indicating if the audio stream is active.
+        /// </summary>
 		public bool Active {
 			get {
 				return (audioSource?.RecordingState == RecordState.Recording);
@@ -101,36 +104,41 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		/// <summary>
-		/// Start recording from the hardware audio source.
-		/// </summary>
-		public bool Start ()
-		{
-			Android.OS.Process.SetThreadPriority (Android.OS.ThreadPriority.UrgentAudio);
+        /// <summary>
+        /// Starts the audio stream.
+        /// </summary>
+        public Task Start()
+        {
+            try
+            {
+                if (!Active)
+                {
+                    //not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
+                    Android.OS.Process.SetThreadPriority(Android.OS.ThreadPriority.UrgentAudio);
 
-			init ();
+                    init();
 
-			if (Active)
-			{
-				return Active;
-			}
+                    audioSource.StartRecording();
 
-			audioSource.StartRecording ();
+                    OnActiveChanged?.Invoke(this, true);
 
-			OnActiveChanged?.Invoke (this, true);
+                    Task.Run(() => Record());
+                }
 
-			System.Diagnostics.Debug.WriteLine ("AudioStream.Start(): Stream has started and is active");
+                return Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error in AudioStream.Start(): {0}", ex);
+                throw;
+            }
+        }
 
-			Task.Run (() => Record ());
 
-			return Active;
-		}
-
-
-		/// <summary>
-		/// Stops recording.
-		/// </summary>
-		public void Stop ()
+        /// <summary>
+        /// Stops the audio stream.
+        /// </summary>
+        public Task Stop ()
 		{
 			if (Active)
 			{
@@ -143,7 +151,9 @@ namespace Plugin.AudioRecorder
 			{
 				audioSource.Release ();
 			}
-		}
+
+            return Task.FromResult(true);
+        }
 
 
 		/// <summary>
@@ -180,6 +190,7 @@ namespace Plugin.AudioRecorder
 			{
 				try
 				{
+                    //not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
 					if (readFailureCount > 1)
 					{
 						System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
