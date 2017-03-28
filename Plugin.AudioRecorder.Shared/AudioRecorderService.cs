@@ -10,12 +10,15 @@ namespace Plugin.AudioRecorder
 		AudioStream audioStream;
 
 		bool audioDetected;
+        string filePath;
 		DateTime? silenceTime;
 		DateTime? startTime;
 
 		const string RecordingFileName = "recording.wav";
 
 		public int PreferredSampleRate { get; set; } = 44100;
+
+        public bool IsRecording => audioStream?.Active ?? false;
 
 		public TimeSpan AudioSilenceTimeout { get; set; } = TimeSpan.FromSeconds (2);
 
@@ -30,16 +33,25 @@ namespace Plugin.AudioRecorder
 		public event EventHandler<string> AudioInputReceived;
 
 
-		public void StartRecording ()
+        partial void Init();
+
+
+        public AudioRecorderService()
+        {
+            Init();
+        }
+
+
+        public async Task StartRecording ()
 		{
 			ResetAudioDetection ();
 
 			InitializeStream (PreferredSampleRate);
 
-			if (!recorder.StartRecorder (audioStream, GetFilename ()))
-			{
-				throw new Exception ("AudioStream failed to start: busy?");
-			}
+            if (!(await recorder.StartRecorder(audioStream, GetFilename())))
+            {
+                throw new Exception("AudioStream failed to start: busy?");
+            }
 
 			startTime = DateTime.Now;
 
@@ -55,13 +67,13 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		void AudioStream_OnBroadcast (object sender, byte [] bytes)
+		async void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
-			var level = AudioFunctions.CalculateLevel (bytes);
+            var level = AudioFunctions.CalculateLevel(bytes);//, bigEndian: true, signed: false);
 
-			//System.Diagnostics.Debug.WriteLine ("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
+            System.Diagnostics.Debug.WriteLine("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
 
-			if (level > SilenceThreshold) //did we find a signal?
+            if (level > SilenceThreshold) //did we find a signal?
 			{
 				audioDetected = true;
 				silenceTime = null;
@@ -74,7 +86,7 @@ namespace Plugin.AudioRecorder
 					if (DateTime.Now.Subtract (silenceTime.Value) > AudioSilenceTimeout)
 					{
 						System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): AudioSilenceTimeout exceeded, stopping recording");
-						StopRecording ();
+						await StopRecording ();
 						return;
 					}
 				}
@@ -87,35 +99,32 @@ namespace Plugin.AudioRecorder
 			if (StopRecordingAfterTimeout && DateTime.Now - startTime > TotalAudioTimeout)
 			{
 				System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
-				StopRecording ();
+				await StopRecording ();
 			}
 		}
 
 
-		public void StopRecording (bool continueProcessing = true)
-		{
-			audioStream.OnBroadcast -= AudioStream_OnBroadcast;
+        public async Task StopRecording(bool continueProcessing = true)
+        {
+            audioStream.OnBroadcast -= AudioStream_OnBroadcast;
 
-			Task.Run (() =>
-			{
-				try
-				{
-					recorder.StopRecorder ();
-					audioStream.Stop ();
-				}
-				catch (Exception ex)
-				{
-					System.Diagnostics.Debug.WriteLine (ex.Message);
-				}
+            try
+            {
+                recorder.StopRecorder();
+                await audioStream.Stop();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error in StopRecording: {0}", ex.Message);
+            }
 
-				if (continueProcessing)
-				{
-					System.Diagnostics.Debug.WriteLine ("AudioRecorderService.StopRecording(): Recording stopped, raising AudioInputReceived event");
+            if (continueProcessing)
+            {
+                System.Diagnostics.Debug.WriteLine("AudioRecorderService.StopRecording(): Recording stopped, raising AudioInputReceived event");
 
-					AudioInputReceived?.Invoke (this, audioDetected ? GetFilename () : null);
-				}
-			});
-		}
+                AudioInputReceived?.Invoke(this, audioDetected ? GetFilename() : null);
+            }
+        }
 
 		void InitializeStream (int sampleRate)
 		{
@@ -130,10 +139,7 @@ namespace Plugin.AudioRecorder
 					audioStream = new AudioStream (sampleRate);
 				}
 
-				if (StopRecordingOnSilence)
-				{
-					audioStream.OnBroadcast += AudioStream_OnBroadcast;
-				}
+				audioStream.OnBroadcast += AudioStream_OnBroadcast;
 
 				if (recorder == null)
 				{
@@ -149,9 +155,9 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		string GetFilename ()
+		public string GetFilename ()
 		{
-			return Path.Combine (Path.GetTempPath (), RecordingFileName);
+            return filePath;
 		}
 	}
 }

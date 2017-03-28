@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{456390A2-0622-460A-B2F7-2FBD4A9BA868}</ProjectGuid>
-    <Description>Multiplatform library for recording microphone input</Description>
+    <Description>Multiplatform library for recording device microphone input</Description>
     <PackageId>Plugin.AudioRecorder</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Nate Rickard</Authors>
@@ -46,7 +46,8 @@
     <ReferenceAssemblyFramework Include=".NETPortable,Version=v4.5,Profile=Profile111" />
   </ItemGroup>
   <PropertyGroup>
-      <IntersectionAssemblyReferencePath>/Library/Frameworks/Xamarin.Android.framework/Versions/Current/lib/xbuild-frameworks/MonoAndroid/v7.1</IntersectionAssemblyReferencePath>
+    <IntersectionAssemblyReferencePath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v7.1\</IntersectionAssemblyReferencePath>
+    <PackageProjectUrl>https://github.com/NateRickard/Plugin.AudioRecorder</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging">

@@ -1,17 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
 	public class WaveRecorder : IDisposable
 	{
+        FileStream fileStream;
 		StreamWriter streamWriter;
 		BinaryWriter writer;
 		int byteCount;
-		AudioStream stream;
+		IAudioStream stream;
 
-		public bool StartRecorder (AudioStream stream, string fileName)
+		public async Task<bool> StartRecorder (IAudioStream stream, string fileName)
 		{
 			if (stream == null)
 			{
@@ -23,12 +25,13 @@ namespace Plugin.AudioRecorder
 				//if we're restarting, let's see if we have an existing stream configred that can be stopped
 				if (this.stream != null)
 				{
-					this.stream.Stop ();
+					await this.stream.Stop ();
 				}
 
 				this.stream = stream;
 
-				streamWriter = new StreamWriter (fileName, false);
+                fileStream = new FileStream(fileName, FileMode.Create);
+                streamWriter = new StreamWriter(fileStream);
 				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
 
 				byteCount = 0;
@@ -37,7 +40,8 @@ namespace Plugin.AudioRecorder
 
 				if (!this.stream.Active)
 				{
-					return this.stream.Start ();
+                    await this.stream.Start ();
+                    return true;
 				}
 			}
 			catch (Exception ex)
@@ -93,8 +97,10 @@ namespace Plugin.AudioRecorder
 					WriteHeader ();
 				}
 
-				streamWriter.Close ();
-				streamWriter = null;
+                //fileStream.Dispose();
+                streamWriter.Dispose(); //should properly close/dispose the underlying stream as well
+                fileStream = null;
+                streamWriter = null;
 			}
 
 			stream = null;

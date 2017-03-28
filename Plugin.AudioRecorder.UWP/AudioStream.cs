@@ -179,7 +179,6 @@ namespace Plugin.AudioRecorder
                 {
                     reader.InputStreamOptions = InputStreamOptions.Partial;
                     //reader.UnicodeEncoding = UnicodeEncoding.Utf8;
-                    //reader.
 
                     while (Active)
                     {
