@@ -214,3 +214,4 @@ Thumbs.db
 
 #bitrise
 .bitrise*
+Plugin.AudioRecorder.UWP/project.lock.json
