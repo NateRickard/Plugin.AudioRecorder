@@ -1,0 +1,22 @@
+﻿<Page
+    x:Class="AudioRecord.UWP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AudioRecord.UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.BottomAppBar>
+        <AppBar IsOpen="True" IsSticky="True">
+            <StackPanel Orientation="Horizontal">
+                <AppBarButton x:Name="recordBtn" Label="Record" Icon="Microphone" Click="RecordBtn_Click"></AppBarButton>
+                <AppBarButton x:Name="playBtn" Label="Play" Icon="Play" Click="PlayBtn_Click"></AppBarButton>
+            </StackPanel>
+        </AppBar>
+    </Page.BottomAppBar>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <CheckBox x:Name="checkTimeout" Content="Timeout after silence?" HorizontalAlignment="Left" Margin="21,566,0,0" VerticalAlignment="Stretch" Width="329"/>
+    </Grid>
+</Page>
