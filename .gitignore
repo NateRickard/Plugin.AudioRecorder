@@ -217,3 +217,4 @@ Thumbs.db
 Plugin.AudioRecorder.UWP/project.lock.json
 .vs/config/applicationhost.config
 .vs/slnx.sqlite
+.vs/VSWorkspaceState.json
