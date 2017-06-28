@@ -7,7 +7,7 @@ namespace Plugin.AudioRecorder
 {
 	public class WaveRecorder : IDisposable
 	{
-        FileStream fileStream;
+		FileStream fileStream;
 		StreamWriter streamWriter;
 		BinaryWriter writer;
 		int byteCount;
@@ -30,8 +30,8 @@ namespace Plugin.AudioRecorder
 
 				this.stream = stream;
 
-                fileStream = new FileStream(fileName, FileMode.Create);
-                streamWriter = new StreamWriter(fileStream);
+				fileStream = new FileStream (fileName, FileMode.Create);
+				streamWriter = new StreamWriter (fileStream);
 				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
 
 				byteCount = 0;
@@ -40,8 +40,7 @@ namespace Plugin.AudioRecorder
 
 				if (!this.stream.Active)
 				{
-                    await this.stream.Start ();
-                    return true;
+					await this.stream.Start ();
 				}
 			}
 			catch (Exception ex)
@@ -97,10 +96,10 @@ namespace Plugin.AudioRecorder
 					WriteHeader ();
 				}
 
-                //fileStream.Dispose();
-                streamWriter.Dispose(); //should properly close/dispose the underlying stream as well
-                fileStream = null;
-                streamWriter = null;
+				//fileStream.Dispose();
+				streamWriter.Dispose (); //should properly close/dispose the underlying stream as well
+				fileStream = null;
+				streamWriter = null;
 			}
 
 			stream = null;

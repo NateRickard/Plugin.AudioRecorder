@@ -5,7 +5,7 @@ using Android.Media;
 namespace Plugin.AudioRecorder
 {
 	public class AudioStream : IAudioStream
-    {
+	{
 		readonly int bufferSize;
 		ChannelIn channels = ChannelIn.Mono;
 		Encoding audioFormat = Encoding.Pcm16bit;
@@ -78,9 +78,9 @@ namespace Plugin.AudioRecorder
 		}
 
 
-        /// <summary>
-        /// Gets a value indicating if the audio stream is active.
-        /// </summary>
+		/// <summary>
+		/// Gets a value indicating if the audio stream is active.
+		/// </summary>
 		public bool Active {
 			get {
 				return (audioSource?.RecordingState == RecordState.Recording);
@@ -101,44 +101,51 @@ namespace Plugin.AudioRecorder
 				channels,
 				audioFormat,
 				bufferSize);
+
+			if (audioSource.State == State.Uninitialized)
+			{
+				throw new Exception ("Unable to successfully initialize AudioRecord; reporting State.Uninitialized.  If using an emulator, make sure it has access to the system microphone.");
+			}
 		}
 
 
-        /// <summary>
-        /// Starts the audio stream.
-        /// </summary>
-        public Task Start()
-        {
-            try
-            {
-                if (!Active)
-                {
-                    //not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
-                    Android.OS.Process.SetThreadPriority(Android.OS.ThreadPriority.UrgentAudio);
+		/// <summary>
+		/// Starts the audio stream.
+		/// </summary>
+		public Task Start ()
+		{
+			try
+			{
+				if (!Active)
+				{
+					//not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
+					Android.OS.Process.SetThreadPriority (Android.OS.ThreadPriority.UrgentAudio);
 
-                    init();
+					init ();
 
-                    audioSource.StartRecording();
+					audioSource.StartRecording ();
 
-                    OnActiveChanged?.Invoke(this, true);
+					OnActiveChanged?.Invoke (this, true);
 
-                    Task.Run(() => Record());
-                }
+					Task.Run (() => Record ());
+				}
 
-                return Task.FromResult(true);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error in AudioStream.Start(): {0}", ex);
-                throw;
-            }
-        }
+				return Task.FromResult (true);
+			}
+			catch (Exception ex)
+			{
+				Stop ();
+
+				System.Diagnostics.Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex);
+				throw;
+			}
+		}
 
 
-        /// <summary>
-        /// Stops the audio stream.
-        /// </summary>
-        public Task Stop ()
+		/// <summary>
+		/// Stops the audio stream.
+		/// </summary>
+		public Task Stop ()
 		{
 			if (Active)
 			{
@@ -152,8 +159,8 @@ namespace Plugin.AudioRecorder
 				audioSource.Release ();
 			}
 
-            return Task.FromResult(true);
-        }
+			return Task.FromResult (true);
+		}
 
 
 		/// <summary>
@@ -180,48 +187,50 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Record from the microphone and broadcast the buffer.
 		/// </summary>
-		void Record ()
+		async Task Record ()
 		{
 			byte [] data = new byte [bufferSize];
 			int readFailureCount = 0;
 			int readResult = 0;
 
+			System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Starting background loop to read audio stream");
+
 			while (Active)
 			{
 				try
 				{
-                    //not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
+					//not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
 					if (readFailureCount > 1)
 					{
 						System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
-						Stop ();
+						await Stop ();
 						break;
 					}
 
-					readResult = audioSource.Read (data, 0, bufferSize);
+					readResult = audioSource.Read (data, 0, bufferSize); //this can block if there are no bytes to read
 
 					//readResult should == the # bytes read, except a few special cases
 					if (readResult > 0)
+					{
+						readFailureCount = 0;
+						OnBroadcast?.Invoke (this, data);
+					}
+					else
 					{
 						switch (readResult)
 						{
 							case (int)TrackStatus.ErrorInvalidOperation:
 							case (int)TrackStatus.ErrorBadValue:
 							case (int)TrackStatus.ErrorDeadObject:
-							case (int)TrackStatus.Error:
+								System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
+								await Stop ();
+								break;
+							//case (int)TrackStatus.Error:
+							default:
 								readFailureCount++;
 								System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
 								break;
-							default:
-								readFailureCount = 0;
-								OnBroadcast?.Invoke (this, data);
-								break;
 						}
-					}
-					else
-					{
-						readFailureCount++;
-						System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Non positive readResult returned: {0}", readResult);
 					}
 				}
 				catch (Exception ex)

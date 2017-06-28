@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioRecord.UWP", "Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugin.AudioRecorder.UWP", "Plugin.AudioRecorder.UWP\Plugin.AudioRecorder.UWP.csproj", "{63ACDD90-C65C-4060-BFA3-4ED608FF1BE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioRecord.Android", "Samples\AudioRecord.Android\AudioRecord.Android.csproj", "{BAA47E1C-A5F2-428A-88E4-BA20B5A56230}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Plugin.AudioRecorder.Shared\Plugin.AudioRecorder.Shared.projitems*{63acdd90-c65c-4060-bfa3-4ed608ff1be7}*SharedItemsImports = 4
