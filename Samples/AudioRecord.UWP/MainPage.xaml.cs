@@ -38,7 +38,7 @@ namespace AudioRecord.UWP
             });
         }
 
-        public async Task PlayRecordedAudio(CoreDispatcher UiDispatcher)
+        async Task PlayRecordedAudio(CoreDispatcher UiDispatcher)
         {
             MediaElement playback = new MediaElement();
             StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
@@ -62,12 +62,14 @@ namespace AudioRecord.UWP
                 recorder.StopRecordingOnSilence = checkTimeout.IsChecked.Value;
 
                 await recorder.StartRecording();
+
                 recordBtn.Icon = new SymbolIcon(Symbol.Stop);
                 recordBtn.Label = "Stop";
             }
             else
             {
                 await recorder.StopRecording();
+
                 recordBtn.Icon = new SymbolIcon(Symbol.Microphone);
                 recordBtn.Label = "Record";
             }

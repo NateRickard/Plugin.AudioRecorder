@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Plugin.AudioRecorder
 {
@@ -67,9 +70,22 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		async void AudioStream_OnBroadcast (object sender, byte [] bytes)
+        private IEnumerable<short> Decode(byte[] byteArray)
+        {
+            for (var i = 0; i < byteArray.Length - 1; i += 2)
+            {
+                yield return (BitConverter.ToInt16(byteArray, i));
+            }
+        }
+
+
+        async void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
-            var level = AudioFunctions.CalculateLevel(bytes);//, bigEndian: true, signed: false);
+            //var level = AudioFunctions.CalculateLevel(bytes);//, bigEndian: true);//, bigEndian: true, signed: false);
+
+            var level = Decode(bytes).Select(Math.Abs).Average(x => x);
+
+            //double level = Math.Sqrt(sum / (bytes.Length / 2));
 
             System.Diagnostics.Debug.WriteLine("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
 

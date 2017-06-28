@@ -8,7 +8,7 @@ namespace Plugin.AudioRecorder
 {
     public class AudioStream : IAudioStream
     {
-        readonly uint bufferSize = 640;
+        readonly uint bufferSize = 1024;
         MediaCapture capture;
         InMemoryRandomAccessStream stream;
 
@@ -104,9 +104,10 @@ namespace Plugin.AudioRecorder
                 if (!Active)
                 {
                     await Init();
-
+                    
                     var profile = MediaEncodingProfile.CreateWav(AudioEncodingQuality.Low);
                     profile.Audio = AudioEncodingProperties.CreatePcm((uint)SampleRate, (uint)ChannelCount, (uint)BitsPerSample);
+                    
 
                     await capture.StartRecordToStreamAsync(profile, stream);
 
