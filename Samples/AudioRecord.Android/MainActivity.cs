@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System;
 using Android.Media;
 
-namespace AudioRecord.Android
+namespace AudioRecord.Droid
 {
 	[Activity (Label = "AudioRecord.Android", MainLauncher = true, Icon = "@mipmap/icon")]
 	public class MainActivity : Activity
