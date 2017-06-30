@@ -13,7 +13,7 @@ Records audio on a device's microphone input.
 | ------------------- | :-----------: | :------------------: |
 |Xamarin.iOS|Yes|iOS 7+|
 |Xamarin.iOS Unified|Yes|iOS 7+|
-|Xamarin.Android|Yes|API 10+|
+|Xamarin.Android|Yes|API 16+|
 |Windows Phone Silverlight|No||
 |Windows Phone RT|No||
 |Windows Store RT|No||
@@ -21,6 +21,28 @@ Records audio on a device's microphone input.
 |Xamarin.Mac|No||
 
 **_Supports both classic Xamarin.iOS / Xamarin.Android and Xamarin.Forms_**
+
+### Permissions
+
+#### Android
+
+```XML
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
+#### iOS
+
+```XML
+<key>NSMicrophoneUsageDescription</key>
+<string>The [app name] wants to use your microphone to record audio.</string>
+```
+
+#### UWP
+
+You must check the `Internet` and `Microphone` capabilities in your app's Package.appxmanifest file.
+
 
 ## Usage
 
