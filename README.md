@@ -54,14 +54,49 @@ Complete samples are available in the /Samples folder.
 
 ### Properties & Settings
 
-|Property|Usage|
-| ------------------- | :---------------------: |
-| `bool IsRecording` | Returns a value indicating if the AudioRecorderService is currently recording audio |
-| `bool StopRecordingAfterTimeout` | Gets/sets a value indicating if the AudioRecorderService should stop recording after a certain amount of time.  Default is `true` |
-| `TimeSpan TotalAudioTimeout ` | _If_ `StopRecordingAfterTimeout` is set to `true`, this `TimeSpan` indicates the total amount of time to record audio for before recording is stopped. Defaults to 30 seconds. |
-| `bool StopRecordingOnSilence ` | Gets/sets a value indicating if the AudioRecorderService should stop recording after silence (low audio signal) is detected.  Default is `true` |
-| `TimeSpan AudioSilenceTimeout ` | _If_ `StopRecordingOnSilence ` is set to `true`, this `TimeSpan` indicates the amount of 'silent' time is required before recording is stopped. Defaults to 2 seconds. |
-| `float SilenceThreshold` | Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.  Defaults to .2. Value should be between 0 and 1. |
+
+- IsRecording
+
+	```C#
+	bool IsRecording
+	```
+
+	Returns a value indicating if the AudioRecorderService is currently recording audio.
+
+- StopRecordingAfterTimeout / TotalAudioTimeout
+
+	```C#
+	bool StopRecordingAfterTimeout
+	```
+	
+	Gets/sets a value indicating if the AudioRecorderService should stop recording after a certain amount of time.  Default is `true`.
+
+	```C#
+	TimeSpan TotalAudioTimeout
+	```
+
+	_If_ `StopRecordingAfterTimeout` is set to `true`, this `TimeSpan` indicates the total amount of time to record audio for before recording is stopped. Defaults to 30 seconds.
+
+- StopRecordingOnSilence / AudioSilenceTimeout
+
+	```C#
+	bool StopRecordingOnSilence
+	```
+	
+	Gets/sets a value indicating if the AudioRecorderService should stop recording after silence (low audio signal) is detected.  Default is `true`.
+	
+	```C#
+	TimeSpan AudioSilenceTimeout
+	```
+	_If_ `StopRecordingOnSilence ` is set to `true`, this `TimeSpan` indicates the amount of 'silent' time is required before recording is stopped. Defaults to 2 seconds.
+
+- SilenceThreshold
+
+	```C#
+	float SilenceThreshold
+	```
+	
+	Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.  Defaults to .2. Value should be between 0 and 1.
 
 
 # Limitations
