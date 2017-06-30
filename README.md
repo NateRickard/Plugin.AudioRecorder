@@ -24,7 +24,7 @@ Records audio on a device's microphone input.
 
 ## Usage
 
-In a controller/activity/page, initialize a new `AudioRecorderService`: 
+In a controller/activity/page, initialize a new `AudioRecorderService` and listen for the `AudioInputReceived` event:
 
 ```C#
 AudioRecorderService recorder = new AudioRecorderService ();recorder.AudioInputReceived += Recorder_AudioInputReceived;
