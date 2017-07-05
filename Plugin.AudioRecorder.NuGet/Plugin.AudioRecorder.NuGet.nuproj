@@ -14,7 +14,7 @@
   </ItemGroup>
   <PropertyGroup Label="Configuration">
     <PackageId>Plugin.AudioRecorder</PackageId>
-    <PackageVersion Condition="'$(PackageVersion)' == ''">1.0.0</PackageVersion>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">0.3.0-prerelease</PackageVersion>
     <Title>AudioRecorder plugin for Xamarin and Windows</Title>
     <Authors>Nate Rickard</Authors>
     <Owners>Nate Rickard</Owners>
@@ -33,6 +33,7 @@
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <ProjectGuid>c3a3e4ba-bbf1-4c9f-9003-5018639eeccf</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging">
       <Version>0.1.324</Version>

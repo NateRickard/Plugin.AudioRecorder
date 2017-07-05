@@ -2,7 +2,7 @@
 
 namespace Plugin.AudioRecorder
 {
-	public static class AudioFunctions
+	internal static class AudioFunctions
 	{
 		static float MAX_8_BITS_SIGNED = byte.MaxValue;
 		static float MAX_8_BITS_UNSIGNED = 0xff;

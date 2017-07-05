@@ -4,7 +4,7 @@ using Android.Media;
 
 namespace Plugin.AudioRecorder
 {
-	public class AudioStream : IAudioStream
+	internal class AudioStream : IAudioStream
 	{
 		readonly int bufferSize;
 		ChannelIn channels = ChannelIn.Mono;

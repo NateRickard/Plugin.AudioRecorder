@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
-	public class WaveRecorder : IDisposable
+	internal class WaveRecorder : IDisposable
 	{
 		FileStream fileStream;
 		StreamWriter streamWriter;

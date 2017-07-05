@@ -114,7 +114,7 @@ namespace Plugin.AudioRecorder
                     Active = true;
                     OnActiveChanged?.Invoke(this, true);
 
-                    Task.Run(() => Record());
+                    _ = Task.Run(() => Record());
                 }
             }
             catch (Exception ex)

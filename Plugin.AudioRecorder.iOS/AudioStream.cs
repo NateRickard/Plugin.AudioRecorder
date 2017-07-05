@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
-	public class AudioStream : IAudioStream
+	internal class AudioStream : IAudioStream
     {
 		const int DefaultBufferSize = 640;
 

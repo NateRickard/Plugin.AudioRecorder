@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
-    public interface IAudioStream
+	internal interface IAudioStream
     {
         /// <summary>
         /// Occurs when new audio has been streamed.
