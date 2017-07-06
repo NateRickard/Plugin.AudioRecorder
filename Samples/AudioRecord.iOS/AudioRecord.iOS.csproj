@@ -103,7 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Plugin.AudioRecorder.iOS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Plugin.AudioRecorder.0.3.1-prerelease\lib\xamarinios10\Plugin.AudioRecorder.iOS.dll</HintPath>
+      <HintPath>..\..\packages\Plugin.AudioRecorder.0.4.0-prerelease\lib\xamarinios10\Plugin.AudioRecorder.iOS.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
