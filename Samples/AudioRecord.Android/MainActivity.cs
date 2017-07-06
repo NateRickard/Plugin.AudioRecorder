@@ -40,7 +40,7 @@ namespace AudioRecord.Droid
 
 			//this can actually take a longggg time in the case that there are issues accessing the AudioManager
 			//	in this case the app will essentially be unusable (it's typically an issue accessing the mic, etc., from the emulator)
-			//	but at least the UI can/will load by throwing this on a background thread
+			//	but at least the UI can/will load by throwing this on a background thread... YMMV
 
 			await Task.Run (() =>
 			 {

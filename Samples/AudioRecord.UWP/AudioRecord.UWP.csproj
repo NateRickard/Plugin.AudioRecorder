@@ -127,12 +127,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Plugin.AudioRecorder.UWP\Plugin.AudioRecorder.UWP.csproj">
-      <Project>{63acdd90-c65c-4060-bfa3-4ed608ff1be7}</Project>
-      <Name>Plugin.AudioRecorder.UWP</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
