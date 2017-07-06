@@ -322,10 +322,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.native.System.IO.Compression/4.1.0": {
@@ -2208,14 +2214,6 @@
             "rid": "aot"
           }
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-arm": {
@@ -2487,10 +2485,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.any.System.Collections/4.0.11": {
@@ -4508,14 +4512,6 @@
         "runtime": {
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-arm-aot": {
@@ -4788,10 +4784,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.aot.System.Collections/4.0.10": {
@@ -6847,14 +6849,6 @@
         "runtime": {
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-x64": {
@@ -7129,10 +7123,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.any.System.Collections/4.0.11": {
@@ -9156,14 +9156,6 @@
         "runtime": {
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-x64-aot": {
@@ -9439,10 +9431,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.aot.System.Collections/4.0.10": {
@@ -11504,14 +11502,6 @@
         "runtime": {
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-x86": {
@@ -11786,10 +11776,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.any.System.Collections/4.0.11": {
@@ -13813,14 +13809,6 @@
         "runtime": {
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
-        }
       }
     },
     "UAP,Version=v10.0/win10-x86-aot": {
@@ -14096,10 +14084,16 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "NuGet.Build.Packaging/0.1.324": {
+      "Plugin.AudioRecorder/0.3.1-prerelease": {
         "type": "package",
-        "build": {
-          "build/_._": {}
+        "dependencies": {
+          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
+        },
+        "compile": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
+        },
+        "runtime": {
+          "lib/netcore50/Plugin.AudioRecorder.UWP.dll": {}
         }
       },
       "runtime.aot.System.Collections/4.0.10": {
@@ -16160,14 +16154,6 @@
         },
         "runtime": {
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
-        }
-      },
-      "Plugin.AudioRecorder.UWP/1.0.0": {
-        "type": "project",
-        "framework": "UAP,Version=v10.0",
-        "dependencies": {
-          "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-          "NuGet.Build.Packaging": "0.1.324"
         }
       }
     }
@@ -18569,39 +18555,19 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "NuGet.Build.Packaging/0.1.324": {
-      "sha512": "EFOHdsp16pXlQDs2BBaySVoAcaHtAnjRqcs5Yvh8X7Hn6g5dQU+ptjL6Uq/2cmV7uR+tVyYgKLBSUqRPSKFm2g==",
+    "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "sha512": "pd7FE+wXSm4WO6D+CymOfo1dMZHcon90PuG+Ga8kJf3ADzBRPhgGrt3UNXRGR1CH/r+Be2e5ihuImtTHwmqzzw==",
       "type": "package",
-      "path": "nuget.build.packaging/0.1.324",
+      "path": "plugin.audiorecorder/0.3.1-prerelease",
       "files": [
-        "build/ApiIntersect.exe",
-        "build/ApiIntersect.exe.config",
-        "build/GenerateReferenceAssembly.csproj",
-        "build/ICSharpCode.Decompiler.dll",
-        "build/ICSharpCode.NRefactory.CSharp.dll",
-        "build/ICSharpCode.NRefactory.Cecil.dll",
-        "build/ICSharpCode.NRefactory.Xml.dll",
-        "build/ICSharpCode.NRefactory.dll",
-        "build/Mono.Cecil.Mdb.dll",
-        "build/Mono.Cecil.Pdb.dll",
-        "build/Mono.Cecil.Rocks.dll",
-        "build/Mono.Cecil.dll",
-        "build/Mono.Options.dll",
-        "build/NuGet.Build.Packaging.Authoring.props",
-        "build/NuGet.Build.Packaging.Authoring.targets",
-        "build/NuGet.Build.Packaging.Compatibility.props",
-        "build/NuGet.Build.Packaging.CrossTargeting.targets",
-        "build/NuGet.Build.Packaging.Inference.targets",
-        "build/NuGet.Build.Packaging.Legacy.props",
-        "build/NuGet.Build.Packaging.Legacy.targets",
-        "build/NuGet.Build.Packaging.ReferenceAssembly.targets",
-        "build/NuGet.Build.Packaging.Tasks.dll",
-        "build/NuGet.Build.Packaging.Tasks.pdb",
-        "build/NuGet.Build.Packaging.Version.props",
-        "build/NuGet.Build.Packaging.props",
-        "build/NuGet.Build.Packaging.targets",
-        "nuget.build.packaging.0.1.324.nupkg.sha512",
-        "nuget.build.packaging.nuspec"
+        "lib/monoandroid71/Plugin.AudioRecorder.Droid.dll",
+        "lib/monoandroid71/Plugin.AudioRecorder.Droid.xml",
+        "lib/netcore50/Plugin.AudioRecorder.UWP.dll",
+        "lib/portable45-net45+win8+wpa81/Plugin.AudioRecorder.Droid.dll",
+        "lib/xamarinios10/Plugin.AudioRecorder.iOS.dll",
+        "lib/xamarinios10/Plugin.AudioRecorder.iOS.xml",
+        "plugin.audiorecorder.0.3.1-prerelease.nupkg.sha512",
+        "plugin.audiorecorder.nuspec"
       ]
     },
     "runtime.any.System.Collections/4.0.11": {
@@ -24467,16 +24433,12 @@
         "ref/xamarinwatchos10/_._",
         "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll"
       ]
-    },
-    "Plugin.AudioRecorder.UWP/1.0.0": {
-      "type": "project",
-      "path": "../../Plugin.AudioRecorder.UWP/project.json",
-      "msbuildProject": "../../Plugin.AudioRecorder.UWP/Plugin.AudioRecorder.UWP.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "": [
-      "Microsoft.NETCore.UniversalWindowsPlatform >= 5.3.3"
+      "Microsoft.NETCore.UniversalWindowsPlatform >= 5.3.3",
+      "Plugin.AudioRecorder >= 0.3.1-prerelease"
     ],
     "UAP,Version=v10.0": []
   },
@@ -24489,19 +24451,11 @@
       "projectName": "AudioRecord.UWP",
       "projectPath": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\AudioRecord.UWP\\AudioRecord.UWP.csproj",
       "projectJsonPath": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\AudioRecord.UWP\\project.json",
-      "projectStyle": "ProjectJson",
-      "frameworks": {
-        "uap10.0": {
-          "projectReferences": {
-            "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Plugin.AudioRecorder.UWP\\Plugin.AudioRecorder.UWP.csproj": {
-              "projectPath": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Plugin.AudioRecorder.UWP\\Plugin.AudioRecorder.UWP.csproj"
-            }
-          }
-        }
-      }
+      "projectStyle": "ProjectJson"
     },
     "dependencies": {
-      "Microsoft.NETCore.UniversalWindowsPlatform": "[5.3.3, )"
+      "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
+      "Plugin.AudioRecorder": "0.3.1-prerelease"
     },
     "frameworks": {
       "uap10.0": {}
