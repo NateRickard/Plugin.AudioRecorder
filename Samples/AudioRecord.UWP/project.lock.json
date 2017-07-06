@@ -322,7 +322,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -2485,7 +2485,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -4784,7 +4784,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -7123,7 +7123,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -9431,7 +9431,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -11776,7 +11776,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -14084,7 +14084,7 @@
           "ref/netstandard1.3/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Plugin.AudioRecorder/0.3.1-prerelease": {
+      "Plugin.AudioRecorder/0.4.0-prerelease": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3"
@@ -18555,10 +18555,10 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "Plugin.AudioRecorder/0.3.1-prerelease": {
-      "sha512": "pd7FE+wXSm4WO6D+CymOfo1dMZHcon90PuG+Ga8kJf3ADzBRPhgGrt3UNXRGR1CH/r+Be2e5ihuImtTHwmqzzw==",
+    "Plugin.AudioRecorder/0.4.0-prerelease": {
+      "sha512": "LsNS692mM2y9r33xXn2N6JrXMgVOb45w3Zc2BKc09zB3JwOB2biofS5qmIto/QU3ghGo4QOo21AGpVCPzfxt5Q==",
       "type": "package",
-      "path": "plugin.audiorecorder/0.3.1-prerelease",
+      "path": "plugin.audiorecorder/0.4.0-prerelease",
       "files": [
         "lib/monoandroid71/Plugin.AudioRecorder.Droid.dll",
         "lib/monoandroid71/Plugin.AudioRecorder.Droid.xml",
@@ -18566,7 +18566,7 @@
         "lib/portable45-net45+win8+wpa81/Plugin.AudioRecorder.Droid.dll",
         "lib/xamarinios10/Plugin.AudioRecorder.iOS.dll",
         "lib/xamarinios10/Plugin.AudioRecorder.iOS.xml",
-        "plugin.audiorecorder.0.3.1-prerelease.nupkg.sha512",
+        "plugin.audiorecorder.0.4.0-prerelease.nupkg.sha512",
         "plugin.audiorecorder.nuspec"
       ]
     },
@@ -24438,7 +24438,7 @@
   "projectFileDependencyGroups": {
     "": [
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.3.3",
-      "Plugin.AudioRecorder >= 0.3.1-prerelease"
+      "Plugin.AudioRecorder >= 0.4.0-prerelease"
     ],
     "UAP,Version=v10.0": []
   },
@@ -24455,7 +24455,7 @@
     },
     "dependencies": {
       "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-      "Plugin.AudioRecorder": "0.3.1-prerelease"
+      "Plugin.AudioRecorder": "[0.4.0-prerelease, )"
     },
     "frameworks": {
       "uap10.0": {}
