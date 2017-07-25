@@ -102,8 +102,8 @@
     <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Plugin.AudioRecorder.iOS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Plugin.AudioRecorder.0.4.0-prerelease\lib\xamarinios10\Plugin.AudioRecorder.iOS.dll</HintPath>
+    <Reference Include="Plugin.AudioRecorder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Plugin.AudioRecorder.0.4.2-prerelease\lib\xamarinios10\Plugin.AudioRecorder.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />

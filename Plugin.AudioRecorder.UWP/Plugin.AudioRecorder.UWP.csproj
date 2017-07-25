@@ -7,8 +7,8 @@
     <ProjectGuid>{63ACDD90-C65C-4060-BFA3-4ED608FF1BE7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Plugin.AudioRecorder.UWP</RootNamespace>
-    <AssemblyName>Plugin.AudioRecorder.UWP</AssemblyName>
+    <RootNamespace>Plugin.AudioRecorder</RootNamespace>
+    <AssemblyName>Plugin.AudioRecorder</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>

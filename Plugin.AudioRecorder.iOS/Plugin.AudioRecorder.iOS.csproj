@@ -9,9 +9,9 @@
     <ProjectGuid>{97D5CF18-98AA-4A96-81C9-4E17F1129C77}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>Plugin.AudioRecorder.iOS</RootNamespace>
+    <RootNamespace>Plugin.AudioRecorder</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>Plugin.AudioRecorder.iOS</AssemblyName>
+    <AssemblyName>Plugin.AudioRecorder</AssemblyName>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -32,7 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DocumentationFile>bin\Release\Plugin.AudioRecorder.iOS.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Plugin.AudioRecorder.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
