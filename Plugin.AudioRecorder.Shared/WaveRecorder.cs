@@ -13,11 +13,11 @@ namespace Plugin.AudioRecorder
 		int byteCount;
 		IAudioStream stream;
 
-		public async Task<bool> StartRecorder (IAudioStream stream, string fileName)
+		public async Task StartRecorder (IAudioStream stream, string fileName)
 		{
 			if (stream == null)
 			{
-				return false;
+				throw new ArgumentNullException (nameof (stream));
 			}
 
 			try
@@ -46,10 +46,8 @@ namespace Plugin.AudioRecorder
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.StartRecorder(): {0}", ex);
-				return false;
+				throw;
 			}
-
-			return true;
 		}
 
 

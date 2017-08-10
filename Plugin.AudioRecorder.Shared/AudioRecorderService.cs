@@ -98,10 +98,7 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
-			if (!(await recorder.StartRecorder (audioStream, GetFilename ())))
-			{
-				throw new Exception ("AudioStream failed to start: busy?");
-			}
+			await recorder.StartRecorder (audioStream, GetFilename ());
 
 			startTime = DateTime.Now;
 
