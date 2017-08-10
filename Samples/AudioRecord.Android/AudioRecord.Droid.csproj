@@ -42,7 +42,7 @@
     <Reference Include="Java.Interop" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Plugin.AudioRecorder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Plugin.AudioRecorder.0.4.2-prerelease\lib\monoandroid71\Plugin.AudioRecorder.dll</HintPath>
+      <HintPath>..\..\packages\Plugin.AudioRecorder.0.4.3-prerelease\lib\monoandroid71\Plugin.AudioRecorder.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />

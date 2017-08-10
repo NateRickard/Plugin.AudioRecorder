@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-    "Plugin.AudioRecorder": "0.4.2-prerelease"
+    "Plugin.AudioRecorder": "0.4.3-prerelease"
   },
   "frameworks": {
     "uap10.0": {}
