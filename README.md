@@ -95,7 +95,7 @@ It's also possible to get a stream to the recording audio data as it's being rec
 
 To access this readonly stream of audio data, you may call the `GetAudioFileStream ()` method.  This is useful in the case you want to immediately begin streaming the audio data to a server or other consumer.
 
-**NOTE:** The provided `Stream` data will contain the PCM audio data and will **not** contain a WAV header.  If your use case requires a WAV header, see the example linked below which contains code to write a WAV file header containing an unknown length.
+**NOTE:** Since the WAV header is written after recording, once the audio length is known, the provided `Stream` data will contain the PCM audio data only and will **not** contain a WAV header.  If your use case requires a WAV header, you can call `AudioFunctions.WriteWaveHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample)`, which will write a WAV header to the stream with an unknown length.
 
 An example of this type of concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.
 
