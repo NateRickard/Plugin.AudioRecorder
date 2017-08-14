@@ -148,11 +148,9 @@ namespace Plugin.AudioRecorder
 
 			var bufferByteSize = this.bufferSize * audioFormat.BytesPerPacket;
 
-			IntPtr bufferPtr;
-
 			for (var index = 0; index < 3; index++)
 			{
-				audioQueue.AllocateBufferWithPacketDescriptors (bufferByteSize, this.bufferSize, out bufferPtr);
+				audioQueue.AllocateBufferWithPacketDescriptors (bufferByteSize, this.bufferSize, out IntPtr bufferPtr);
 				audioQueue.EnqueueBuffer (bufferPtr, bufferByteSize, null);
 			}
 		}
