@@ -45,13 +45,15 @@ Records audio on a device's microphone input.
 You must check the `Internet` and `Microphone` capabilities in your app's Package.appxmanifest file.
 
 
-## Usage
+# Usage
 
 In a controller/activity/page, initialize a new `AudioRecorderService` and listen for the `AudioInputReceived` event:
 
 ```C#
 AudioRecorderService recorder = new AudioRecorderService ();recorder.AudioInputReceived += Recorder_AudioInputReceived;
 ```
+
+## Recording
 
 To begin recording, use the `StartRecording ()` and `StopRecording ()` methods as shown:
 
@@ -72,10 +74,31 @@ private async void Recorder_AudioInputReceived(object sender, string audioFile)
 
 **NOTE:** This event is raised on a background thread to allow for further file processing as needed.  If the `audioFile` is null or empty, no audio was recorded.
 
-Complete samples are available in the /Samples folder.
+
+## Using the Audio Data
+
+There are multiple ways to use the recorded audio data:
 
 
-### Properties & Settings
+### Accessing the Recorded File
+
+The full path to the recorded audio file is contained in the `audioFile` parameter of the `AudioInputReceived` event handler, as shown above.  You can also retrieve the filename directly from the recorder object by calling `GetFilename ()`.
+
+With this file path, you can use standard `FileStream` operations and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
+
+Complete samples showing this type of audio recording and use are available in the /Samples folder.
+
+
+### Concurrent Streaming
+
+It's also possible to get a stream to the recording audio data as it's being recorded, once `StartRecording ()` has been called.
+
+To access this readonly stream of audio data, you may call the `GetAudioFileStream ()` method.  This is useful in the case you want to immediately begin streaming the audio data to a server or other consumer.  
+
+An example of this type of concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.
+
+
+## Properties & Settings
 
 
 - IsRecording
