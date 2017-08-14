@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,6 +20,13 @@ namespace Plugin.AudioRecorder
 		DateTime? startTime;
 
 		const string RecordingFileName = "recording.wav";
+
+
+		/// <summary>
+		/// Gets the details of the underlying audio stream.
+		/// </summary>
+		/// <remarks>Accessible once <see cref="StartRecording"/> has been called.</remarks>
+		public AudioStreamDetails AudioStreamDetails { get; private set; }
 
 
 		/// <summary>
@@ -98,11 +106,28 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
+			AudioStreamDetails = new AudioStreamDetails
+			{
+				ChannelCount = audioStream.ChannelCount,
+				SampleRate = audioStream.SampleRate,
+				BitsPerSample = audioStream.BitsPerSample
+			};
+
 			await recorder.StartRecorder (audioStream, GetFilename ());
 
 			startTime = DateTime.Now;
 
 			System.Diagnostics.Debug.WriteLine ("AudioRecorderService.StartRecording() complete.  Audio is being recorded.");
+		}
+
+
+		/// <summary>
+		/// Gets a new <see cref="Stream"/> to the recording audio file in readonly mode.
+		/// </summary>
+		/// <returns>A <see cref="Stream"/> object that can be used to read the audio file from the beginning.</returns>
+		public Stream GetAudioFileStream ()
+		{
+			return recorder.GetAudioFileStream ();
 		}
 
 

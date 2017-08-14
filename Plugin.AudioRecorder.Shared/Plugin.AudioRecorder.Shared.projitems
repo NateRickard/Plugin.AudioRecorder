@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AudioFunctions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AudioRecorderService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioStreamDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAudioStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WaveRecorder.cs" />
   </ItemGroup>

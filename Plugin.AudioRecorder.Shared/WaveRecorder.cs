@@ -7,12 +7,20 @@ namespace Plugin.AudioRecorder
 {
 	internal class WaveRecorder : IDisposable
 	{
+		string audioFileName;
 		FileStream fileStream;
 		StreamWriter streamWriter;
 		BinaryWriter writer;
 		int byteCount;
-		IAudioStream stream;
+		IAudioStream audioStream;
 
+
+		/// <summary>
+		/// Starts recording WAVE format audio from the audio stream.
+		/// </summary>
+		/// <param name="stream">A <see cref="IAudioStream"/> that provides the audio data.</param>
+		/// <param name="fileName">The full path of the file to record audio to.</param>
+		/// <returns></returns>
 		public async Task StartRecorder (IAudioStream stream, string fileName)
 		{
 			if (stream == null)
@@ -23,24 +31,25 @@ namespace Plugin.AudioRecorder
 			try
 			{
 				//if we're restarting, let's see if we have an existing stream configred that can be stopped
-				if (this.stream != null)
+				if (audioStream != null)
 				{
-					await this.stream.Stop ();
+					await audioStream.Stop ();
 				}
 
-				this.stream = stream;
+				audioFileName = fileName;
+				audioStream = stream;
 
-				fileStream = new FileStream (fileName, FileMode.Create);
+				fileStream = new FileStream (fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
 				streamWriter = new StreamWriter (fileStream);
 				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
 
 				byteCount = 0;
-				this.stream.OnBroadcast += OnStreamBroadcast;
-				this.stream.OnActiveChanged += StreamActiveChanged;
+				audioStream.OnBroadcast += OnStreamBroadcast;
+				audioStream.OnActiveChanged += StreamActiveChanged;
 
-				if (!this.stream.Active)
+				if (!audioStream.Active)
 				{
-					await this.stream.Start ();
+					await audioStream.Start ();
 				}
 			}
 			catch (Exception ex)
@@ -48,6 +57,17 @@ namespace Plugin.AudioRecorder
 				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.StartRecorder(): {0}", ex);
 				throw;
 			}
+		}
+
+
+		/// <summary>
+		/// Gets a new <see cref="Stream"/> to the audio file in readonly mode.
+		/// </summary>
+		/// <returns>A <see cref="Stream"/> object that can be used to read the audio file from the beginning.</returns>
+		public Stream GetAudioFileStream ()
+		{
+			//return a new stream to the same audio file, in Read mode
+			return new FileStream (audioFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
 
@@ -81,10 +101,10 @@ namespace Plugin.AudioRecorder
 
 		public void StopRecorder ()
 		{
-			if (stream != null)
+			if (audioStream != null)
 			{
-				stream.OnBroadcast -= OnStreamBroadcast;
-				stream.OnActiveChanged -= StreamActiveChanged;
+				audioStream.OnBroadcast -= OnStreamBroadcast;
+				audioStream.OnActiveChanged -= StreamActiveChanged;
 			}
 
 			if (streamWriter != null)
@@ -100,7 +120,7 @@ namespace Plugin.AudioRecorder
 				streamWriter = null;
 			}
 
-			stream = null;
+			audioStream = null;
 		}
 
 
@@ -113,35 +133,43 @@ namespace Plugin.AudioRecorder
 		void WriteHeader ()
 		{
 			writer.Seek (0, SeekOrigin.Begin);
-			// chunk ID
+
+			//chunk ID
 			writer.Write ('R');
 			writer.Write ('I');
 			writer.Write ('F');
 			writer.Write ('F');
 
-			writer.Write (byteCount + 36);
+			writer.Write (byteCount + 36); //36 + subchunk 2 size (data size)
+
+			//format
 			writer.Write ('W');
 			writer.Write ('A');
 			writer.Write ('V');
 			writer.Write ('E');
 
+			//subchunk 1 ID
 			writer.Write ('f');
 			writer.Write ('m');
 			writer.Write ('t');
 			writer.Write (' ');
 
-			writer.Write (16);
-			writer.Write ((short)1);
+			writer.Write (16); //subchunk 1 (fmt) size
+			writer.Write ((short)1); //PCM audio format
 
-			writer.Write ((short)stream.ChannelCount);
-			writer.Write (stream.SampleRate);
-			writer.Write (stream.SampleRate * 2);
-			writer.Write ((short)2);
-			writer.Write ((short)stream.BitsPerSample);
+			writer.Write ((short)audioStream.ChannelCount);
+			writer.Write (audioStream.SampleRate);
+			writer.Write (audioStream.SampleRate * 2);
+			writer.Write ((short)2); //block align
+			writer.Write ((short)audioStream.BitsPerSample);
+
+			//subchunk 2 ID
 			writer.Write ('d');
 			writer.Write ('a');
 			writer.Write ('t');
 			writer.Write ('a');
+
+			//subchunk 2 (data) size
 			writer.Write (byteCount);
 		}
 	}
