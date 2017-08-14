@@ -1,8 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
 namespace Plugin.AudioRecorder
 {
-	internal static class AudioFunctions
+	/// <summary>
+	/// Contains functions used to work with audio recording.
+	/// </summary>
+	public static class AudioFunctions
 	{
 		static float MAX_8_BITS_SIGNED = byte.MaxValue;
 		static float MAX_8_BITS_UNSIGNED = 0xff;
@@ -10,8 +15,75 @@ namespace Plugin.AudioRecorder
 		static float MAX_16_BITS_UNSIGNED = 0xffff;
 
 
+		/// <summary>
+		/// Writes a WAV file header using the specified details.
+		/// </summary>
+		/// <param name="stream">The <see cref="Stream"/> to write the WAV header to.</param>
+		/// <param name="channelCount">The number of channels in the recorded audio.</param>
+		/// <param name="sampleRate">The sample rate of the recorded audio.</param>
+		/// <param name="bitsPerSample">The bits per sample of the recorded audio.</param>
+		public static void WriteWavHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample)
+		{
+			using (var writer = new BinaryWriter (stream, Encoding.UTF8))
+			{
+				WriteWavHeader (writer, channelCount, sampleRate, bitsPerSample);
+			}
+		}
+
+
+		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int length = -1)
+		{
+			writer.Seek (0, SeekOrigin.Begin);
+
+			//chunk ID
+			writer.Write ('R');
+			writer.Write ('I');
+			writer.Write ('F');
+			writer.Write ('F');
+
+			if (length > -1)
+			{
+				writer.Write (length + 36); // 36 + subchunk 2 size (data size)
+			}
+			else
+			{
+				writer.Write (length); // -1 (Unkown size)
+			}
+
+			//format
+			writer.Write ('W');
+			writer.Write ('A');
+			writer.Write ('V');
+			writer.Write ('E');
+
+			//subchunk 1 ID
+			writer.Write ('f');
+			writer.Write ('m');
+			writer.Write ('t');
+			writer.Write (' ');
+
+			writer.Write (16); //subchunk 1 (fmt) size
+			writer.Write ((short) 1); //PCM audio format
+
+			writer.Write ((short) channelCount);
+			writer.Write (sampleRate);
+			writer.Write (sampleRate * 2);
+			writer.Write ((short) 2); //block align
+			writer.Write ((short) bitsPerSample);
+
+			//subchunk 2 ID
+			writer.Write ('d');
+			writer.Write ('a');
+			writer.Write ('t');
+			writer.Write ('a');
+
+			//subchunk 2 (data) size
+			writer.Write (length);
+		}
+
+
 		// Adapted from http://stackoverflow.com/questions/5800649/detect-silence-when-recording
-		public static float CalculateLevel (byte [] buffer, int readPoint = 0, int leftOver = 0, bool use16Bit = true, bool signed = true, bool bigEndian = false)
+		internal static float CalculateLevel (byte [] buffer, int readPoint = 0, int leftOver = 0, bool use16Bit = true, bool signed = true, bool bigEndian = false)
 		{
 			float level;
 			int max = 0;
