@@ -40,36 +40,24 @@ namespace Plugin.AudioRecorder
 
 
 		/// <summary>
-		/// Gets the channel count.
+		/// Gets the channel count.  Currently always 1 (Mono).
 		/// </summary>
 		/// <value>
 		/// The channel count.
 		/// </value>
-		public int ChannelCount {
-			get {
-				return 1;
-			}
-		}
+		public int ChannelCount => 1;
 
 
 		/// <summary>
-		/// Gets bits per sample.
+		/// Gets bits per sample.  Currently always 16 (bits).
 		/// </summary>
-		public int BitsPerSample {
-			get {
-				return 16;
-			}
-		}
+		public int BitsPerSample => 16;
 
 
         /// <summary>
         /// Gets a value indicating if the audio stream is active.
         /// </summary>
-		public bool Active {
-            get {
-                return this.audioQueue.IsRunning;
-            }
-        }
+		public bool Active => audioQueue?.IsRunning ?? false;
 
 
         /// <summary>
@@ -132,12 +120,12 @@ namespace Plugin.AudioRecorder
 		{
 			var audioFormat = new AudioStreamBasicDescription
 			{
-				SampleRate = this.SampleRate,
+				SampleRate = SampleRate,
 				Format = AudioFormatType.LinearPCM,
 				FormatFlags = AudioFormatFlags.LinearPCMIsSignedInteger | AudioFormatFlags.LinearPCMIsPacked,
 				FramesPerPacket = 1,
 				ChannelsPerFrame = 1,
-				BitsPerChannel = this.BitsPerSample,
+				BitsPerChannel = BitsPerSample,
 				BytesPerPacket = 2,
 				BytesPerFrame = 2,
 				Reserved = 0
@@ -146,11 +134,11 @@ namespace Plugin.AudioRecorder
 			audioQueue = new InputAudioQueue (audioFormat);
 			audioQueue.InputCompleted += QueueInputCompleted;
 
-			var bufferByteSize = this.bufferSize * audioFormat.BytesPerPacket;
+			var bufferByteSize = bufferSize * audioFormat.BytesPerPacket;
 
 			for (var index = 0; index < 3; index++)
 			{
-				audioQueue.AllocateBufferWithPacketDescriptors (bufferByteSize, this.bufferSize, out IntPtr bufferPtr);
+				audioQueue.AllocateBufferWithPacketDescriptors (bufferByteSize, bufferSize, out IntPtr bufferPtr);
 				audioQueue.EnqueueBuffer (bufferPtr, bufferByteSize, null);
 			}
 		}
@@ -164,19 +152,19 @@ namespace Plugin.AudioRecorder
 		void QueueInputCompleted (object sender, InputCompletedEventArgs e)
 		{
 			// return if we aren't actively monitoring audio packets
-			if (!this.Active)
+			if (!Active)
 			{
 				return;
 			}
 
-			var buffer = (AudioQueueBuffer)System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
+			var buffer = (AudioQueueBuffer) System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
 
 			var send = new byte [buffer.AudioDataByteSize];
-			System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, send, 0, (int)buffer.AudioDataByteSize);
+			System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, send, 0, (int) buffer.AudioDataByteSize);
 
-			this.OnBroadcast?.Invoke (this, send);
+			OnBroadcast?.Invoke (this, send);
 
-			var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, this.bufferSize, e.PacketDescriptions);
+			var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
 
 			if (status != AudioQueueStatus.Ok)
 			{

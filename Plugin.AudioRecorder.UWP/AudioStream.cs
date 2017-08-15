@@ -154,7 +154,7 @@ namespace Plugin.AudioRecorder
         {
             await Stop();
 
-            throw new Exception("Record Limitation Exceeded ");
+            throw new Exception("Record Limitation Exceeded");
         }
 
 
@@ -162,7 +162,7 @@ namespace Plugin.AudioRecorder
         {
             await Stop();
 
-            throw new Exception(string.Format("OnCaptureFailed error; Code.Message: {0}. {1}", errorEventArgs.Code, errorEventArgs.Message));
+            throw new Exception($"OnCaptureFailed error; Code.Message: {errorEventArgs.Code}. {errorEventArgs.Message}");
         }
 
 
@@ -214,7 +214,7 @@ namespace Plugin.AudioRecorder
                         {
                             readFailureCount++;
 
-                            System.Diagnostics.Debug.WriteLine("Error in Android AudioStream.Record(): {0}", ex.Message);
+                            System.Diagnostics.Debug.WriteLine("Error in Android AudioStream.Record(): {0}", ex);
                             OnException?.Invoke(this, ex);
                         }
                     }
@@ -222,7 +222,7 @@ namespace Plugin.AudioRecorder
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error in Android AudioStream.Record(): {0}", ex.Message);
+                System.Diagnostics.Debug.WriteLine("Error in Android AudioStream.Record(): {0}", ex);
                 OnException?.Invoke(this, ex);
             }
         }

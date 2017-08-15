@@ -7,6 +7,7 @@ namespace Plugin.AudioRecorder
 	internal class AudioStream : IAudioStream
 	{
 		readonly int bufferSize;
+
 		ChannelIn channels = ChannelIn.Mono;
 		Encoding audioFormat = Encoding.Pcm16bit;
 
@@ -47,11 +48,7 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Gets bits per sample.
 		/// </summary>
-		public int BitsPerSample {
-			get {
-				return (audioSource.AudioFormat == Encoding.Pcm16bit) ? 16 : 8;
-			}
-		}
+		public int BitsPerSample => (audioSource.AudioFormat == Encoding.Pcm16bit) ? 16 : 8;
 
 
 		/// <summary>
@@ -60,32 +57,20 @@ namespace Plugin.AudioRecorder
 		/// <value>
 		/// The channel count.
 		/// </value>        
-		public int ChannelCount {
-			get {
-				return audioSource.ChannelCount;
-			}
-		}
+		public int ChannelCount => audioSource.ChannelCount;
 
 
 		/// <summary>
 		/// Gets the average data transfer rate
 		/// </summary>
 		/// <value>The average data transfer rate in bytes per second.</value>
-		public int AverageBytesPerSecond {
-			get {
-				return SampleRate * BitsPerSample / 8 * ChannelCount;
-			}
-		}
+		public int AverageBytesPerSecond => SampleRate * BitsPerSample / 8 * ChannelCount;
 
 
 		/// <summary>
 		/// Gets a value indicating if the audio stream is active.
 		/// </summary>
-		public bool Active {
-			get {
-				return (audioSource?.RecordingState == RecordState.Recording);
-			}
-		}
+		public bool Active => audioSource?.RecordingState == RecordState.Recording;
 
 
 		void init ()
@@ -237,7 +222,7 @@ namespace Plugin.AudioRecorder
 				{
 					readFailureCount++;
 
-					System.Diagnostics.Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
+					System.Diagnostics.Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex);
 
 					OnException?.Invoke (this, ex);
 				}

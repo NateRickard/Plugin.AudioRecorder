@@ -7,7 +7,7 @@ namespace Plugin.AudioRecorder
 {
 	internal class WaveRecorder : IDisposable
 	{
-		string audioFileName;
+		string audioFilePath;
 		FileStream fileStream;
 		StreamWriter streamWriter;
 		BinaryWriter writer;
@@ -19,9 +19,8 @@ namespace Plugin.AudioRecorder
 		/// Starts recording WAVE format audio from the audio stream.
 		/// </summary>
 		/// <param name="stream">A <see cref="IAudioStream"/> that provides the audio data.</param>
-		/// <param name="fileName">The full path of the file to record audio to.</param>
-		/// <returns></returns>
-		public async Task StartRecorder (IAudioStream stream, string fileName)
+		/// <param name="filePath">The full path of the file to record audio to.</param>
+		public async Task StartRecorder (IAudioStream stream, string filePath)
 		{
 			if (stream == null)
 			{
@@ -36,10 +35,10 @@ namespace Plugin.AudioRecorder
 					await audioStream.Stop ();
 				}
 
-				audioFileName = fileName;
+				audioFilePath = filePath;
 				audioStream = stream;
 
-				fileStream = new FileStream (fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+				fileStream = new FileStream (filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
 				streamWriter = new StreamWriter (fileStream);
 				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
 
@@ -67,7 +66,7 @@ namespace Plugin.AudioRecorder
 		public Stream GetAudioFileStream ()
 		{
 			//return a new stream to the same audio file, in Read mode
-			return new FileStream (audioFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			return new FileStream (audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
 
@@ -84,15 +83,17 @@ namespace Plugin.AudioRecorder
 		{
 			try
 			{
-				if (streamWriter != null)
+				if (writer != null && streamWriter != null)
 				{
 					writer.Write (bytes);
 					byteCount += bytes.Length;
+
+					//System.Diagnostics.Debug.WriteLine ("OnStreamBroadcast: Wrote {0} bytes to file stream", bytes.Length);
 				}
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.OnStreamBroadcast(): {0}", ex.Message);
+				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.OnStreamBroadcast(): {0}", ex);
 
 				StopRecorder ();
 			}
@@ -101,27 +102,38 @@ namespace Plugin.AudioRecorder
 
 		public void StopRecorder ()
 		{
-			if (audioStream != null)
+			try
 			{
-				audioStream.OnBroadcast -= OnStreamBroadcast;
-				audioStream.OnActiveChanged -= StreamActiveChanged;
-			}
-
-			if (streamWriter != null)
-			{
-				if (streamWriter.BaseStream.CanWrite)
+				if (audioStream != null)
 				{
-					writer.Seek (0, SeekOrigin.Begin);
-					AudioFunctions.WriteWavHeader (writer, audioStream.ChannelCount, audioStream.SampleRate, audioStream.BitsPerSample);
+					System.Diagnostics.Debug.WriteLine ("StopRecorder: Removing audioStream event handlers");
+
+					audioStream.OnBroadcast -= OnStreamBroadcast;
+					audioStream.OnActiveChanged -= StreamActiveChanged;
 				}
 
-				//fileStream.Dispose();
-				streamWriter.Dispose (); //should properly close/dispose the underlying stream as well
-				fileStream = null;
-				streamWriter = null;
-			}
+				if (writer != null)
+				{
+					if (streamWriter.BaseStream.CanWrite)
+					{
+						//now that audio is finished recording, write a WAV /RIFF header at the beginning of the file
+						writer.Seek (0, SeekOrigin.Begin);
+						AudioFunctions.WriteWavHeader (writer, audioStream.ChannelCount, audioStream.SampleRate, audioStream.BitsPerSample, byteCount);
+					}
 
-			audioStream = null;
+					writer.Dispose (); //this should properly close/dispose the underlying stream as well
+					writer = null;
+					fileStream = null;
+					streamWriter = null;
+				}
+
+				audioStream = null;
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine ("Error during StopRecorder: {0}", ex);
+				throw;
+			}
 		}
 
 
