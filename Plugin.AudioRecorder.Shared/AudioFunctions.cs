@@ -22,16 +22,17 @@ namespace Plugin.AudioRecorder
 		/// <param name="channelCount">The number of channels in the recorded audio.</param>
 		/// <param name="sampleRate">The sample rate of the recorded audio.</param>
 		/// <param name="bitsPerSample">The bits per sample of the recorded audio.</param>
-		public static void WriteWavHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample)
+		/// <param name="audioLength">The length/byte count of the recorded audio, or -1 if recording is still in progress.</param>
+		public static void WriteWavHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample, int audioLength = -1)
 		{
 			using (var writer = new BinaryWriter (stream, Encoding.UTF8))
 			{
-				WriteWavHeader (writer, channelCount, sampleRate, bitsPerSample);
+				WriteWavHeader (writer, channelCount, sampleRate, bitsPerSample, audioLength);
 			}
 		}
 
 
-		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int length = -1)
+		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int audioLength = -1)
 		{
 			writer.Seek (0, SeekOrigin.Begin);
 
@@ -41,13 +42,13 @@ namespace Plugin.AudioRecorder
 			writer.Write ('F');
 			writer.Write ('F');
 
-			if (length > -1)
+			if (audioLength > -1)
 			{
-				writer.Write (length + 36); // 36 + subchunk 2 size (data size)
+				writer.Write (audioLength + 36); // 36 + subchunk 2 size (data size)
 			}
 			else
 			{
-				writer.Write (length); // -1 (Unkown size)
+				writer.Write (audioLength); // -1 (Unkown size)
 			}
 
 			//format
@@ -78,7 +79,7 @@ namespace Plugin.AudioRecorder
 			writer.Write ('a');
 
 			//subchunk 2 (data) size
-			writer.Write (length);
+			writer.Write (audioLength);
 		}
 
 
