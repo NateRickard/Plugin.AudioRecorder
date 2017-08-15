@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
@@ -12,7 +10,7 @@ namespace Plugin.AudioRecorder
 	public partial class AudioRecorderService
 	{
 		WaveRecorder recorder;
-		AudioStream audioStream;
+		IAudioStream audioStream;
 
 		bool audioDetected;
 		string filePath;
@@ -106,14 +104,14 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
+			await recorder.StartRecorder (audioStream, GetFilename ());
+
 			AudioStreamDetails = new AudioStreamDetails
 			{
 				ChannelCount = audioStream.ChannelCount,
 				SampleRate = audioStream.SampleRate,
 				BitsPerSample = audioStream.BitsPerSample
 			};
-
-			await recorder.StartRecorder (audioStream, GetFilename ());
 
 			startTime = DateTime.Now;
 
@@ -139,13 +137,13 @@ namespace Plugin.AudioRecorder
 		}
 
 
-        private IEnumerable<short> Decode(byte[] byteArray)
-        {
-            for (var i = 0; i < byteArray.Length - 1; i += 2)
-            {
-                yield return (BitConverter.ToInt16(byteArray, i));
-            }
-        }
+        //private IEnumerable<short> Decode(byte[] byteArray)
+        //{
+        //    for (var i = 0; i < byteArray.Length - 1; i += 2)
+        //    {
+        //        yield return (BitConverter.ToInt16(byteArray, i));
+        //    }
+        //}
 
 
         async void AudioStream_OnBroadcast (object sender, byte [] bytes)
@@ -156,7 +154,7 @@ namespace Plugin.AudioRecorder
 
             //double level = Math.Sqrt(sum / (bytes.Length / 2));
 
-			System.Diagnostics.Debug.WriteLine ("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
+			//System.Diagnostics.Debug.WriteLine ("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
 
 			if (level > SilenceThreshold) //did we find a signal?
 			{
@@ -205,7 +203,7 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in StopRecording: {0}", ex.Message);
+				System.Diagnostics.Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
 
 			if (continueProcessing)
