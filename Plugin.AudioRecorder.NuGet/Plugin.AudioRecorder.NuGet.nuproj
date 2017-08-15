@@ -14,7 +14,7 @@
   </ItemGroup>
   <PropertyGroup Label="Configuration">
     <PackageId>Plugin.AudioRecorder</PackageId>
-    <PackageVersion Condition="'$(PackageVersion)' == ''">0.5.5-prerelease</PackageVersion>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">0.6.1-prerelease</PackageVersion>
     <Title>AudioRecorder plugin for Xamarin and Windows</Title>
     <Authors>Nate Rickard</Authors>
     <Owners>Nate Rickard</Owners>
