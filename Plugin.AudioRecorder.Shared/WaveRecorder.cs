@@ -29,7 +29,7 @@ namespace Plugin.AudioRecorder
 
 			try
 			{
-				//if we're restarting, let's see if we have an existing stream configred that can be stopped
+				//if we're restarting, let's see if we have an existing stream configured that can be stopped
 				if (audioStream != null)
 				{
 					await audioStream.Stop ();
@@ -87,8 +87,6 @@ namespace Plugin.AudioRecorder
 				{
 					writer.Write (bytes);
 					byteCount += bytes.Length;
-
-					//System.Diagnostics.Debug.WriteLine ("OnStreamBroadcast: Wrote {0} bytes to file stream", bytes.Length);
 				}
 			}
 			catch (Exception ex)
@@ -100,14 +98,15 @@ namespace Plugin.AudioRecorder
 		}
 
 
+		/// <summary>
+		/// Stops recording WAV audio from the underlying <see cref="IAudioStream"/> and finishes writing the WAV file.
+		/// </summary>
 		public void StopRecorder ()
 		{
 			try
 			{
 				if (audioStream != null)
 				{
-					System.Diagnostics.Debug.WriteLine ("StopRecorder: Removing audioStream event handlers");
-
 					audioStream.OnBroadcast -= OnStreamBroadcast;
 					audioStream.OnActiveChanged -= StreamActiveChanged;
 				}
@@ -116,7 +115,7 @@ namespace Plugin.AudioRecorder
 				{
 					if (streamWriter.BaseStream.CanWrite)
 					{
-						//now that audio is finished recording, write a WAV /RIFF header at the beginning of the file
+						//now that audio is finished recording, write a WAV/RIFF header at the beginning of the file
 						writer.Seek (0, SeekOrigin.Begin);
 						AudioFunctions.WriteWavHeader (writer, audioStream.ChannelCount, audioStream.SampleRate, audioStream.BitsPerSample, byteCount);
 					}

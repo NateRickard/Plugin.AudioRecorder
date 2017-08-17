@@ -9,6 +9,8 @@ namespace Plugin.AudioRecorder
 	/// </summary>
 	public partial class AudioRecorderService
 	{
+		const string RecordingFileName = "ARS_recording.wav";
+
 		WaveRecorder recorder;
 		IAudioStream audioStream;
 
@@ -16,8 +18,7 @@ namespace Plugin.AudioRecorder
 		string filePath;
 		DateTime? silenceTime;
 		DateTime? startTime;
-
-		const string RecordingFileName = "recording.wav";
+		TaskCompletionSource<string> recordTask;
 
 
 		/// <summary>
@@ -83,6 +84,15 @@ namespace Plugin.AudioRecorder
 		public event EventHandler<string> AudioInputReceived;
 
 
+		/// <summary>
+		/// A <see cref="Task"/> that will complete when audio recording is complete.  
+		/// This allows a consumer to await this Task and take action once recording is done.
+		/// </summary>
+		/// <remarks>This will only return a valid awaitable Task if used after calling <see cref="StartRecording"/>.  
+		/// The string returned by the Task will contain the audio file path, or null if no audio was recorded or this Task was used prior to calling <see cref="StartRecording"/></remarks>
+		public Task<string> AudioRecordTask => recordTask?.Task ?? Task.FromResult<string> (null);
+
+
 		partial void Init ();
 
 
@@ -104,7 +114,7 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, GetFilename ());
+			await recorder.StartRecorder (audioStream, GetAudioFilepath ());
 
 			AudioStreamDetails = new AudioStreamDetails
 			{
@@ -114,6 +124,7 @@ namespace Plugin.AudioRecorder
 			};
 
 			startTime = DateTime.Now;
+			recordTask = new TaskCompletionSource<string> ();
 
 			System.Diagnostics.Debug.WriteLine ("AudioRecorderService.StartRecording() complete.  Audio is being recorded.");
 		}
@@ -146,13 +157,13 @@ namespace Plugin.AudioRecorder
         //}
 
 
-        async void AudioStream_OnBroadcast (object sender, byte [] bytes)
+        void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
             var level = AudioFunctions.CalculateLevel(bytes);//, bigEndian: true);//, bigEndian: true, signed: false);
 
-            //var level = Decode(bytes).Select(Math.Abs).Average(x => x);
+			//var level = Decode(bytes).Select(Math.Abs).Average(x => x);
 
-            //double level = Math.Sqrt(sum / (bytes.Length / 2));
+			//double level = Math.Sqrt(sum / (bytes.Length / 2));
 
 			//System.Diagnostics.Debug.WriteLine ("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
 
@@ -169,7 +180,8 @@ namespace Plugin.AudioRecorder
 					if (DateTime.Now.Subtract (silenceTime.Value) > AudioSilenceTimeout)
 					{
 						System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): AudioSilenceTimeout exceeded, stopping recording");
-						await StopRecording ();
+						audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
+						_ = Task.Run (() => StopRecording());
 						return;
 					}
 				}
@@ -182,7 +194,8 @@ namespace Plugin.AudioRecorder
 			if (StopRecordingAfterTimeout && DateTime.Now - startTime > TotalAudioTimeout)
 			{
 				System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
-				await StopRecording ();
+				audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
+				_ = Task.Run (() => StopRecording ());
 			}
 		}
 
@@ -198,19 +211,23 @@ namespace Plugin.AudioRecorder
 
 			try
 			{
-				recorder.StopRecorder ();
 				await audioStream.Stop ();
+				//WaveRecorder will be stopped as result of stream stopping
 			}
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
 
+			var returnedFilePath = audioDetected ? GetAudioFilepath () : null;
+			//complete the recording Task for anthing waiting on this
+			recordTask.TrySetResult (returnedFilePath);
+
 			if (continueProcessing)
 			{
-				System.Diagnostics.Debug.WriteLine ("AudioRecorderService.StopRecording(): Recording stopped, raising AudioInputReceived event");
+				System.Diagnostics.Debug.WriteLine ($"AudioRecorderService.StopRecording(): Recording stopped, raising AudioInputReceived event; audioDetected == {audioDetected}; filePath == {returnedFilePath}");
 
-				AudioInputReceived?.Invoke (this, audioDetected ? GetFilename () : null);
+				AudioInputReceived?.Invoke (this, returnedFilePath);
 			}
 		}
 
@@ -234,8 +251,6 @@ namespace Plugin.AudioRecorder
 				{
 					recorder = new WaveRecorder ();
 				}
-
-				System.Diagnostics.Debug.WriteLine ("AudioRecorderService.InitializeStream() complete.  Audio stream is initialized.");
 			}
 			catch (Exception ex)
 			{
@@ -248,7 +263,7 @@ namespace Plugin.AudioRecorder
 		/// Gets the full filepath to the recorded audio file.
 		/// </summary>
 		/// <returns>The full filepath to the recorded audio file.</returns>
-		public string GetFilename ()
+		public string GetAudioFilepath ()
 		{
 			return filePath;
 		}
