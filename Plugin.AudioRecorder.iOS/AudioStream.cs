@@ -7,10 +7,9 @@ namespace Plugin.AudioRecorder
 	internal class AudioStream : IAudioStream
     {
 		const int DefaultBufferSize = 640;
+		readonly int bufferSize;
 
 		InputAudioQueue audioQueue;
-
-		readonly int bufferSize;
 
 		/// <summary>
 		/// Occurs when new audio has been streamed.
@@ -69,11 +68,13 @@ namespace Plugin.AudioRecorder
             {
                 if (!Active)
                 {
-                    var result = audioQueue.Start();
+					initAudioQueue ();
 
-                    if (result == AudioQueueStatus.Ok)
+					var result = audioQueue.Start();
+
+					if (result == AudioQueueStatus.Ok)
                     {
-                        OnActiveChanged?.Invoke(this, true);
+						OnActiveChanged?.Invoke(this, true);
                     }
                     else
                     {
@@ -91,15 +92,28 @@ namespace Plugin.AudioRecorder
 		}
 
 
-        /// <summary>
-        /// Stops the audio stream.
-        /// </summary>
+		/// <summary>
+		/// Stops the audio stream.
+		/// </summary>
 		public Task Stop ()
 		{
-			audioQueue.Stop (true);
-			OnActiveChanged?.Invoke (this, false);
+			audioQueue.InputCompleted -= QueueInputCompleted;
 
-            return Task.FromResult(true);
+			var result = audioQueue.Stop (true);
+
+			audioQueue.Dispose ();
+			audioQueue = null;
+
+			if (result == AudioQueueStatus.Ok)
+			{
+				OnActiveChanged?.Invoke (this, false);
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
+			}
+
+			return Task.FromResult (true);
 		}
 
 
@@ -112,11 +126,10 @@ namespace Plugin.AudioRecorder
 		{
 			SampleRate = sampleRate;
 			this.bufferSize = bufferSize;
-			init ();
 		}
 
 
-		void init ()
+		void initAudioQueue ()
 		{
 			var audioFormat = new AudioStreamBasicDescription
 			{
@@ -151,24 +164,37 @@ namespace Plugin.AudioRecorder
 		/// <param name='e'> Input completed parameters.</param>
 		void QueueInputCompleted (object sender, InputCompletedEventArgs e)
 		{
-			// return if we aren't actively monitoring audio packets
-			if (!Active)
+			try
 			{
-				return;
+				// we'll only broadcast if we're actively monitoring audio packets
+				if (!Active)
+				{
+					return;
+				}
+
+				//copy data from the audio queue to a byte buffer
+				var buffer = (AudioQueueBuffer) System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
+				var audioBytes = new byte [buffer.AudioDataByteSize];
+				System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, audioBytes, 0, (int) buffer.AudioDataByteSize);
+
+				//broadcast the audio data to any listeners
+				OnBroadcast?.Invoke (this, audioBytes);
+
+				//check for null/active again, because the auto stop logic may stop the audio queue from within this handler!
+				if (Active)
+				{
+					var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
+
+					if (status != AudioQueueStatus.Ok)
+					{
+						System.Diagnostics.Debug.WriteLine ("AudioStream.QueueInputCompleted() :: audioQueue.EnqueueBuffer returned non-Ok status :: {0}", status);
+						OnException?.Invoke (this, new Exception ($"audioQueue.EnqueueBuffer returned non-Ok status :: {status}"));
+					}
+				}
 			}
-
-			var buffer = (AudioQueueBuffer) System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
-
-			var send = new byte [buffer.AudioDataByteSize];
-			System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, send, 0, (int) buffer.AudioDataByteSize);
-
-			OnBroadcast?.Invoke (this, send);
-
-			var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
-
-			if (status != AudioQueueStatus.Ok)
+			catch (Exception ex)
 			{
-				OnException?.Invoke (this, new Exception ($"audioQueue.EnqueueBuffer returned non-Ok status :: {status}"));
+				System.Diagnostics.Debug.WriteLine ("AudioStream.QueueInputCompleted() :: Error: {0}", ex);
 			}
 		}
 	}
