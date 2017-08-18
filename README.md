@@ -73,7 +73,7 @@ async void RecordButton_Click (object sender, EventArgs e){	await RecordAudio 
 	...	}}
 ```
 
-In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are explained below.
+In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are [explained below](#properties-&-settings).
 
 ### Task-based API
 
