@@ -75,15 +75,24 @@ async void RecordButton_Click (object sender, EventArgs e){	await RecordAudio 
 
 In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are [explained below](#properties-and-settings).
 
+
+## Using the Audio Data
+
+Once recording has begun, there are two different ways to determine when recording has finished:
+
 ### Task-based API
 
-Once `StartRecording ()` has been called, you can await the result of the `AudioRecordTask`, which will complete when recording is complete and return the path to the recorded audio file.
+To use the Task-based API, you can grab the returned `Task` from the call to `StartRecording ()`.  This allows you to await the result of the `Task`, which will complete when recording is complete and return the path to the recorded audio file.
 
 Example:
 
 ```C#
-await recorder.StartRecording ();
-var audioFile = await recorder.AudioRecordTask;
+var recordTask = await recorder.StartRecording ();
+
+... maybe do some other things like toggle your 'mic' button off while recording
+
+//await the returned Task... this will complete once recording has been stopped
+var audioFile = await recordTask;
 
 if (audioFile != null) //non-null audioFile indicates audio was successfully recorded
 {
@@ -103,29 +112,34 @@ recorder.AudioInputReceived += Recorder_AudioInputReceived;
 
 ...
 
+await recorder.StartRecording ();
+
+...
+
 private async void Recorder_AudioInputReceived(object sender, string audioFile){
-...}
+	//do something with the file}
 ```
 
 **NOTE:** This event is raised on a background thread to allow for further file processing as needed.  If the `audioFile` is null or empty, no audio was recorded.
 
+--
 
-## Using the Audio Data
-
-There are multiple ways to use the recorded audio data:
+There are also multiple ways to use the recorded (or recording) audio data:
 
 
 ### Accessing the Recorded File
 
 There are multiple ways to access the recorded audio file path:
 
-- The full path to the recorded audio file is contained in the `audioFile` parameter of the `AudioInputReceived` event handler, as shown above.
-- The `GetAudioFilepath ()` method on the `AudioRecorderService ` class will return the recorded audio file path.
-- The Task-based API will return the file path when the task completes
+- The [Task-based API](#task-based-api) will return the file path when the task completes.  The `Task` can be awaited or use standard `Task` continuation APIs.
+- The [Event-based API](#event-based-api) will return the full path to the recorded audio file in the `audioFile` parameter of the `AudioInputReceived` event handler.
+- The `GetAudioFilePath ()` method on the `AudioRecorderService ` class will return the recorded audio file path.
 
-With this file path, you can use standard `FileStream` operations and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
+These will all return `null` in the case that no audio has been recorded yet or no audio was recorded/detected in the last recording session.
 
-Complete samples showing this type of audio recording and use are available in the /Samples folder.
+Once you have the path to the recorded audio file, you can use standard `FileStream` operations and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
+
+Complete samples demonstrating audio recording and playback of the recorded file are available in the /Samples folder.
 
 
 ### Concurrent Streaming
