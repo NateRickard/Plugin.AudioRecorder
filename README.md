@@ -136,7 +136,7 @@ To access this readonly stream of audio data, you may call the `GetAudioFileStre
 
 **NOTE:** Since the WAV header is written after recording, once the audio length is known, the provided `Stream` data will contain the PCM audio data only and will **not** contain a WAV header.  If your use case requires a WAV header, you can call `AudioFunctions.WriteWaveHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample)`, which will write a WAV header to the stream with an unknown length.
 
-Since `GetAudioFileStream ()` will return a `Stream` that is also being populated concurrently, it can be useful to know when the recording is complete - the `Stream` will continue to grow!  This can be accomplished with either the [Event-based API](#Event-based API) or the [Task-based API](#Task-based API) (which is often more useful).
+Since `GetAudioFileStream ()` will return a `Stream` that is also being populated concurrently, it can be useful to know when the recording is complete - the `Stream` will continue to grow!  This can be accomplished with either the [Event-based API](#event-based-api) or the [Task-based API](#task-based-api) (which is often more useful).
 
 An example of the Task-based API and concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.  This speech client will stream audio data to the server until the `AudioRecordTask` completes, signaling that the recording is finished.
 
