@@ -5,7 +5,7 @@ Records audio on a device's microphone input.
 # Setup
 
 - Available on NuGet: https://www.nuget.org/packages/Plugin.AudioRecorder
-- Install into your PCL project and any platform-specfiic libraries required for your app.
+- Install into your PCL project and any platform-specific libraries required for your app.
 
 ## Platform Support
 
