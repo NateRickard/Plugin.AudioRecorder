@@ -24,6 +24,8 @@ Records audio on a device's microphone input.
 
 ### Permissions
 
+The following permissions are required on each platform:
+
 #### Android
 
 ```XML
@@ -47,11 +49,20 @@ You must check the `Internet` and `Microphone` capabilities in your app's Packag
 
 # Usage
 
-In a controller/activity/page, initialize a new `AudioRecorderService` and listen for the `AudioInputReceived` event:
+In a controller/activity/page, initialize a new `AudioRecorderService`.
+
+Example:
 
 ```C#
-AudioRecorderService recorder = new AudioRecorderService ();recorder.AudioInputReceived += Recorder_AudioInputReceived;
+recorder = new AudioRecorderService
+{
+	StopRecordingOnSilence = true, //will stop recording after 2 seconds (default)
+	StopRecordingAfterTimeout = true,  //stop recording after a max timeout (defined below)
+	TotalAudioTimeout = TimeSpan.FromSeconds (15) //audio will stop recording after 15 seconds
+};
 ```
+
+More settings and properties are defined below.
 
 ## Recording
 
@@ -64,10 +75,34 @@ async void RecordButton_Click (object sender, EventArgs e){	await RecordAudio 
 
 In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are explained below.
 
-The `AudioInputReceived` is raised when recording is complete, and the full filepath of the recorded audio file is passed along:
+### Task-based API
 
+Once `StartRecording ()` has been called, you can await the result of the `AudioRecordTask`, which will complete when recording is complete and return the path to the recorded audio file.
+
+Example:
 
 ```C#
+await recorder.StartRecording ();
+var audioFile = await recorder.AudioRecordTask;
+
+if (audioFile != null) //non-null audioFile indicates audio was successfully recorded
+{
+	//do something with the file
+}
+```
+
+
+### Event-based API
+
+The `AudioInputReceived` is raised when recording is complete, and the full filepath of the recorded audio file is passed along.
+
+Example:
+
+```C#
+recorder.AudioInputReceived += Recorder_AudioInputReceived;
+
+...
+
 private async void Recorder_AudioInputReceived(object sender, string audioFile){
 ...}
 ```
@@ -82,7 +117,11 @@ There are multiple ways to use the recorded audio data:
 
 ### Accessing the Recorded File
 
-The full path to the recorded audio file is contained in the `audioFile` parameter of the `AudioInputReceived` event handler, as shown above.  You can also retrieve the filename directly from the recorder object by calling `GetFilename ()`.
+There are multiple ways to access the recorded audio file path:
+
+- The full path to the recorded audio file is contained in the `audioFile` parameter of the `AudioInputReceived` event handler, as shown above.
+- The `GetAudioFilepath ()` method on the `AudioRecorderService ` class will return the recorded audio file path.
+- The Task-based API will return the file path when the task completes
 
 With this file path, you can use standard `FileStream` operations and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
 
@@ -97,7 +136,9 @@ To access this readonly stream of audio data, you may call the `GetAudioFileStre
 
 **NOTE:** Since the WAV header is written after recording, once the audio length is known, the provided `Stream` data will contain the PCM audio data only and will **not** contain a WAV header.  If your use case requires a WAV header, you can call `AudioFunctions.WriteWaveHeader (Stream stream, int channelCount, int sampleRate, int bitsPerSample)`, which will write a WAV header to the stream with an unknown length.
 
-An example of this type of concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.
+Since `GetAudioFileStream ()` will return a `Stream` that is also being populated concurrently, it can be useful to know when the recording is complete - the `Stream` will continue to grow!  This can be accomplished with either the [Event-based API](### Event-based API) or the [Task-based API](### Task-based API) (which is often more useful).
+
+An example of the Task-based API and concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.  This speech client will stream audio data to the server until the `AudioRecordTask` completes, signaling that the recording is finished.
 
 
 ## Properties & Settings
