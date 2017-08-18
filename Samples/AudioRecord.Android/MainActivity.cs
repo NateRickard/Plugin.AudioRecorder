@@ -12,7 +12,7 @@ namespace AudioRecord.Droid
 	public class MainActivity : Activity
 	{
 		AudioRecorderService recorder;
-		SoundPool soundPool;
+		MediaPlayer player;
 
 		Button recordButton;
 		Button playButton;
@@ -34,26 +34,21 @@ namespace AudioRecord.Droid
 		}
 
 
-		protected override async void OnStart ()
+		protected override void OnStart ()
 		{
 			base.OnStart ();
 
-			//this can actually take a longggg time in the case that there are issues accessing the AudioManager
-			//	in this case the app will essentially be unusable (it's typically an issue accessing the mic, etc., from the emulator)
-			//	but at least the UI can/will load by throwing this on a background thread... YMMV
+			recorder = new AudioRecorderService
+			{
+				StopRecordingOnSilence = false,
+				StopRecordingAfterTimeout = false
+			};
 
-			await Task.Run (() =>
-			 {
-				 recorder = new AudioRecorderService
-				 {
-					 StopRecordingOnSilence = false,
-					 StopRecordingAfterTimeout = false
-				 };
+			//alternative event-based API can be used here in lieu of the returned recordTask used below
+			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
 
-				 recorder.AudioInputReceived += Recorder_AudioInputReceived;
-
-				 soundPool = new SoundPool (1, Stream.Music, 0);
-			 });
+			player = new MediaPlayer ();
+			player.Completion += Player_Completion;
 
 			recordButton.Enabled = true;
 		}
@@ -75,11 +70,21 @@ namespace AudioRecord.Droid
 					recorder.StopRecordingOnSilence = checkTimeout.Checked;
 
 					recordButton.Enabled = false;
+					playButton.Enabled = false;
 
-					await recorder.StartRecording ();
+					//the returned Task here will complete once recording is finished
+					var recordTask = await recorder.StartRecording ();
 
 					recordButton.Text = "Stop";
 					recordButton.Enabled = true;
+
+					var audioFile = await recordTask;
+
+					//audioFile will contain the path to the recorded audio file
+
+					recordButton.Text = "Record";
+
+					playButton.Enabled = !string.IsNullOrEmpty (audioFile);
 				}
 				else
 				{
@@ -120,16 +125,17 @@ namespace AudioRecord.Droid
 		{
 			try
 			{
-				var fileName = recorder.GetFilename ();
+				recordButton.Enabled = false;
+				playButton.Enabled = false;
 
-				var soundId = await soundPool.LoadAsync (fileName, 1);
+				var filePath = recorder.GetAudioFilePath ();
 
-				var playResult = -1;
-
-				while (playResult <= 0) //so hacky, but... sample app
+				if (filePath != null)
 				{
-					await Task.Delay (200);
-					playResult = soundPool.Play (soundId, .99f, .99f, 0, 0, 1);
+					player.Reset ();
+					await player.SetDataSourceAsync (filePath);
+					player.Prepare ();
+					player.Start ();
 				}
 			}
 			catch (Exception ex)
@@ -137,6 +143,15 @@ namespace AudioRecord.Droid
 				//blow up the app!
 				throw ex;
 			}
+		}
+
+
+		private void Player_Completion (object sender, EventArgs e)
+		{
+			player.Stop ();
+
+			recordButton.Enabled = true;
+			playButton.Enabled = true;
 		}
 	}
 }

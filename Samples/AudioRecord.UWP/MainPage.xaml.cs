@@ -26,10 +26,11 @@ namespace AudioRecord.UWP
                 StopRecordingAfterTimeout = false
             };
 
-            recorder.AudioInputReceived += Recorder_AudioInputReceived;
-        }
+			//alternative event-based API can be used here in lieu of the returned recordTask used below
+			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
+		}
 
-        private async void Recorder_AudioInputReceived(object sender, string audioFile)
+		private async void Recorder_AudioInputReceived(object sender, string audioFile)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
@@ -42,7 +43,7 @@ namespace AudioRecord.UWP
         {
             MediaElement playback = new MediaElement();
             StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
-            var fileName = recorder.GetFilename();
+			var fileName = recorder.GetAudioFilePath ();
 
             await UiDispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
             {
@@ -59,13 +60,23 @@ namespace AudioRecord.UWP
         {
             if (!recorder.IsRecording)
             {
-                recorder.StopRecordingOnSilence = checkTimeout.IsChecked.Value;
+				playBtn.IsEnabled = false;
+				recorder.StopRecordingOnSilence = checkTimeout.IsChecked.Value;
 
-                await recorder.StartRecording();
+				//the returned Task here will complete once recording is finished
+                var recordTask = await recorder.StartRecording();
 
                 recordBtn.Icon = new SymbolIcon(Symbol.Stop);
                 recordBtn.Label = "Stop";
-            }
+
+				var audioFile = await recordTask;
+
+				//audioFile will contain the path to the recorded audio file
+
+				recordBtn.Icon = new SymbolIcon (Symbol.Microphone);
+				recordBtn.Label = "Record";
+				playBtn.IsEnabled = !string.IsNullOrEmpty (audioFile);
+			}
             else
             {
                 await recorder.StopRecording();

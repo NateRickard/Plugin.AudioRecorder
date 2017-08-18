@@ -11,7 +11,7 @@
         <AppBar IsOpen="True" IsSticky="True">
             <StackPanel Orientation="Horizontal">
                 <AppBarButton x:Name="recordBtn" Label="Record" Icon="Microphone" Click="RecordBtn_Click"></AppBarButton>
-                <AppBarButton x:Name="playBtn" Label="Play" Icon="Play" Click="PlayBtn_Click"></AppBarButton>
+                <AppBarButton x:Name="playBtn" Label="Play" Icon="Play" Click="PlayBtn_Click" IsEnabled="False"></AppBarButton>
             </StackPanel>
         </AppBar>
     </Page.BottomAppBar>

@@ -28,7 +28,8 @@ namespace AudioRecord.iOS
 				StopRecordingAfterTimeout = false
 			};
 
-			recorder.AudioInputReceived += Recorder_AudioInputReceived;
+			//alternative event-based API can be used here in lieu of the returned recordTask used below
+			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
 		}
 
 
@@ -54,11 +55,20 @@ namespace AudioRecord.iOS
 					recorder.StopRecordingOnSilence = TimeoutSwitch.On;
 
 					RecordButton.Enabled = false;
+					PlayButton.Enabled = false;
 
-					await recorder.StartRecording ();
+					//the returned Task here will complete once recording is finished
+					var recordTask = await recorder.StartRecording ();
 
 					RecordButton.SetTitle ("Stop", UIControlState.Normal);
 					RecordButton.Enabled = true;
+
+					var audioFile = await recordTask;
+
+					//audioFile will contain the path to the recorded audio file
+
+					RecordButton.SetTitle ("Record", UIControlState.Normal);
+					PlayButton.Enabled = !string.IsNullOrEmpty (audioFile);
 				}
 				else
 				{
@@ -104,7 +114,7 @@ namespace AudioRecord.iOS
 						player.Dispose ();
 					}
 
-					var uri = new NSUrl (recorder.GetFilename ());
+					var uri = new NSUrl (recorder.GetAudioFilePath ());
 					NSError err;
 
 					player = new AVAudioPlayer (uri, "wav", out err);
