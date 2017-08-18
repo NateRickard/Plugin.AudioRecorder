@@ -84,15 +84,6 @@ namespace Plugin.AudioRecorder
 		public event EventHandler<string> AudioInputReceived;
 
 
-		/// <summary>
-		/// A <see cref="Task"/> that will complete when audio recording is complete.  
-		/// This allows a consumer to await this Task and take action once recording is done.
-		/// </summary>
-		/// <remarks>This will only return a valid awaitable Task if used after calling <see cref="StartRecording"/>.  
-		/// The string returned by the Task will contain the audio file path, or null if no audio was recorded or this Task was used prior to calling <see cref="StartRecording"/></remarks>
-		public Task<string> AudioRecordTask => recordTask?.Task ?? Task.FromResult<string> (null);
-
-
 		partial void Init ();
 
 
@@ -108,13 +99,15 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Starts recording audio.
 		/// </summary>
-		public async Task StartRecording ()
+		/// <returns>A <see cref="Task"/> that will complete when recording is finished.  
+		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
+		public async Task<Task<string>> StartRecording ()
 		{
 			ResetAudioDetection ();
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, GetAudioFilepath ());
+			await recorder.StartRecorder (audioStream, filePath);
 
 			AudioStreamDetails = new AudioStreamDetails
 			{
@@ -127,6 +120,8 @@ namespace Plugin.AudioRecorder
 			recordTask = new TaskCompletionSource<string> ();
 
 			System.Diagnostics.Debug.WriteLine ("AudioRecorderService.StartRecording() complete.  Audio is being recorded.");
+
+			return recordTask.Task;
 		}
 
 
@@ -148,18 +143,18 @@ namespace Plugin.AudioRecorder
 		}
 
 
-        //private IEnumerable<short> Decode(byte[] byteArray)
-        //{
-        //    for (var i = 0; i < byteArray.Length - 1; i += 2)
-        //    {
-        //        yield return (BitConverter.ToInt16(byteArray, i));
-        //    }
-        //}
+		//private IEnumerable<short> Decode(byte[] byteArray)
+		//{
+		//    for (var i = 0; i < byteArray.Length - 1; i += 2)
+		//    {
+		//        yield return (BitConverter.ToInt16(byteArray, i));
+		//    }
+		//}
 
 
-        void AudioStream_OnBroadcast (object sender, byte [] bytes)
+		void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
-            var level = AudioFunctions.CalculateLevel(bytes);//, bigEndian: true);//, bigEndian: true, signed: false);
+			var level = AudioFunctions.CalculateLevel (bytes);//, bigEndian: true);//, bigEndian: true, signed: false);
 
 			//var level = Decode(bytes).Select(Math.Abs).Average(x => x);
 
@@ -181,7 +176,7 @@ namespace Plugin.AudioRecorder
 					{
 						System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): AudioSilenceTimeout exceeded, stopping recording");
 						audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
-						_ = Task.Run (() => StopRecording());
+						_ = Task.Run (() => StopRecording ());
 						return;
 					}
 				}
@@ -219,7 +214,7 @@ namespace Plugin.AudioRecorder
 				System.Diagnostics.Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
 
-			var returnedFilePath = audioDetected ? GetAudioFilepath () : null;
+			var returnedFilePath = GetAudioFilePath ();
 			//complete the recording Task for anthing waiting on this
 			recordTask.TrySetResult (returnedFilePath);
 
@@ -262,10 +257,10 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Gets the full filepath to the recorded audio file.
 		/// </summary>
-		/// <returns>The full filepath to the recorded audio file.</returns>
-		public string GetAudioFilepath ()
+		/// <returns>The full filepath to the recorded audio file, or null if no audio was detected during the last record.</returns>
+		public string GetAudioFilePath ()
 		{
-			return filePath;
+			return audioDetected ? filePath : null;
 		}
 	}
 }
