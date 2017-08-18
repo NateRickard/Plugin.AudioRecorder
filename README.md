@@ -62,7 +62,7 @@ recorder = new AudioRecorderService
 };
 ```
 
-More settings and properties are defined below.
+More settings and properties are [defined below](#properties-and-settings)
 
 ## Recording
 
@@ -73,7 +73,7 @@ async void RecordButton_Click (object sender, EventArgs e){	await RecordAudio 
 	...	}}
 ```
 
-In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are [explained below](#properties-&-settings).
+In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are [explained below](#properties-and-settings).
 
 ### Task-based API
 
@@ -141,7 +141,7 @@ Since `GetAudioFileStream ()` will return a `Stream` that is also being populate
 An example of the Task-based API and concurrent writing and reading of the audio data is shown in the sample accompanying the [Xamarin.Cognitive.Speech](https://github.com/NateRickard/Xamarin.Cognitive.BingSpeech) library.  This speech client will stream audio data to the server until the `AudioRecordTask` completes, signaling that the recording is finished.
 
 
-## Properties & Settings
+## Properties and Settings
 
 
 - IsRecording
