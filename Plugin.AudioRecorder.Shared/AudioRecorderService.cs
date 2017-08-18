@@ -174,9 +174,7 @@ namespace Plugin.AudioRecorder
 				{
 					if (DateTime.Now.Subtract (silenceTime.Value) > AudioSilenceTimeout)
 					{
-						System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): AudioSilenceTimeout exceeded, stopping recording");
-						audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
-						_ = Task.Run (() => StopRecording ());
+						timeout ("AudioRecorderService.AudioStream_OnBroadcast (): AudioSilenceTimeout exceeded, stopping recording");
 						return;
 					}
 				}
@@ -188,10 +186,18 @@ namespace Plugin.AudioRecorder
 
 			if (StopRecordingAfterTimeout && DateTime.Now - startTime > TotalAudioTimeout)
 			{
-				System.Diagnostics.Debug.WriteLine ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
-				audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
-				_ = Task.Run (() => StopRecording ());
+				timeout ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
 			}
+		}
+
+
+		void timeout (string reason)
+		{
+			System.Diagnostics.Debug.WriteLine (reason);
+			audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
+			//since we're in the middle of handling a broadcast event when an audio timeout occurs, we need to break the StopRecording call on another thread
+			//	Otherwise, Bad. Things. Happen.
+			_ = Task.Run (() => StopRecording ());
 		}
 
 
