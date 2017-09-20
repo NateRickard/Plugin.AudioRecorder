@@ -220,3 +220,6 @@ Plugin.AudioRecorder.UWP/project.lock.json
 .vs/VSWorkspaceState.json
 Samples/AudioRecord.UWP/project.lock.json
 Samples/AudioRecord.UWP/project.lock.json
+Plugin.AudioRecorder.NuGet/Plugin.AudioRecorder.NuGet.nuget.props
+
+Plugin.AudioRecorder.NuGet/Plugin.AudioRecorder.NuGet.nuget.targets
