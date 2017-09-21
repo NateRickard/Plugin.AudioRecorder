@@ -223,3 +223,11 @@ Samples/AudioRecord.UWP/project.lock.json
 Plugin.AudioRecorder.NuGet/Plugin.AudioRecorder.NuGet.nuget.props
 
 Plugin.AudioRecorder.NuGet/Plugin.AudioRecorder.NuGet.nuget.targets
+Plugin.AudioRecorder.UWP/Plugin.AudioRecorder.UWP.nuget.props
+Plugin.AudioRecorder.UWP/Plugin.AudioRecorder.UWP.nuget.props
+Samples/Forms/AudioRecord.Forms.UWP/AudioRecord.Forms.UWP.nuget.targets
+Samples/Forms/AudioRecord.Forms.UWP/project.lock.json
+Samples/Native/AudioRecord.UWP/AudioRecord.UWP.nuget.props
+Samples/Native/AudioRecord.UWP/project.lock.json
+Samples/Native/AudioRecord.UWP/project.lock.json
+Plugin.AudioRecorder.UWP/Plugin.AudioRecorder.UWP.nuget.props

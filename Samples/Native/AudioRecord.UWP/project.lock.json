@@ -24447,10 +24447,10 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\AudioRecord.UWP.csproj",
+      "projectUniqueName": "C:\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\AudioRecord.UWP.csproj",
       "projectName": "AudioRecord.UWP",
-      "projectPath": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\AudioRecord.UWP.csproj",
-      "projectJsonPath": "C:\\Users\\Administrator\\Documents\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\project.json",
+      "projectPath": "C:\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\AudioRecord.UWP.csproj",
+      "projectJsonPath": "C:\\Repos\\PartnerTeam\\Projects\\Plugin.AudioRecorder\\Samples\\Native\\AudioRecord.UWP\\project.json",
       "projectStyle": "ProjectJson"
     },
     "dependencies": {

@@ -1,8 +1,9 @@
 ﻿using Plugin.AudioRecorder;
 using System;
 using System.Threading.Tasks;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 using Windows.Storage;
-using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,8 +16,9 @@ namespace AudioRecord.UWP
     public sealed partial class MainPage : Page
     {
         AudioRecorderService recorder;
+		MediaPlayer audioPlayer;
 
-        public MainPage()
+		public MainPage()
         {
             this.InitializeComponent();
 
@@ -28,6 +30,9 @@ namespace AudioRecord.UWP
 
 			//alternative event-based API can be used here in lieu of the returned recordTask used below
 			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
+
+			audioPlayer = new MediaPlayer ();
+			audioPlayer.MediaEnded += AudioPlayer_MediaEnded;
 		}
 
 		private async void Recorder_AudioInputReceived(object sender, string audioFile)
@@ -36,22 +41,6 @@ namespace AudioRecord.UWP
             {
                 recordBtn.Icon = new SymbolIcon(Symbol.Microphone);
                 recordBtn.Label = "Record";
-            });
-        }
-
-        async Task PlayRecordedAudio(CoreDispatcher UiDispatcher)
-        {
-            MediaElement playback = new MediaElement();
-            StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
-			var fileName = recorder.GetAudioFilePath ();
-
-            await UiDispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-            {
-                var storageFile = await StorageFile.GetFileFromPathAsync(fileName);
-
-                IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
-                playback.SetSource(stream, storageFile.FileType);
-                playback.Play();
             });
         }
 
@@ -91,5 +80,34 @@ namespace AudioRecord.UWP
         {
             await PlayRecordedAudio(Dispatcher);
         }
-    }
+
+
+		async Task PlayRecordedAudio (CoreDispatcher UiDispatcher)
+		{
+			playBtn.IsEnabled = false;
+			recordBtn.IsEnabled = false;
+
+			StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
+			var fileName = recorder.GetAudioFilePath ();
+
+			//await UiDispatcher.RunAsync (CoreDispatcherPriority.Normal, async () =>
+			//{
+				var storageFile = await StorageFile.GetFileFromPathAsync (fileName);
+
+				//IRandomAccessStream stream = await storageFile.OpenAsync (FileAccessMode.Read);
+				audioPlayer.Source = MediaSource.CreateFromStorageFile (storageFile);
+				audioPlayer.Play ();
+			//});
+		}
+
+
+		private async void AudioPlayer_MediaEnded (MediaPlayer sender, object args)
+		{
+			await Dispatcher.RunAsync (CoreDispatcherPriority.Normal, () =>
+			{
+				playBtn.IsEnabled = true;
+				recordBtn.IsEnabled = true;
+			});
+		}
+	}
 }
