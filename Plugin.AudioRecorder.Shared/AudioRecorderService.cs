@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,13 +9,12 @@ namespace Plugin.AudioRecorder
 	/// </summary>
 	public partial class AudioRecorderService
 	{
-		const string RecordingFileName = "ARS_recording.wav";
+		const string DefaultFileName = "ARS_recording.wav";
 
 		WaveRecorder recorder;
 		IAudioStream audioStream;
 
 		bool audioDetected;
-		string filePath;
 		DateTime? silenceTime;
 		DateTime? startTime;
 		TaskCompletionSource<string> recordTask;
@@ -26,6 +25,13 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		/// <remarks>Accessible once <see cref="StartRecording"/> has been called.</remarks>
 		public AudioStreamDetails AudioStreamDetails { get; private set; }
+
+
+		/// <summary>
+		/// Gets/sets the desired file path. If null it will be set automatically
+		/// to a temporary file.
+		/// </summary>
+		public string FilePath { get; set; }
 
 
 		/// <summary>
@@ -92,7 +98,7 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		public AudioRecorderService ()
 		{
-			Init ();
+			Init();
 		}
 
 
@@ -103,11 +109,16 @@ namespace Plugin.AudioRecorder
 		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
 		public async Task<Task<string>> StartRecording ()
 		{
+			if (FilePath == null)
+			{
+				FilePath = await GetDefaultFilePath ();
+			}
+
 			ResetAudioDetection ();
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, filePath);
+			await recorder.StartRecorder (audioStream, FilePath);
 
 			AudioStreamDetails = new AudioStreamDetails
 			{
@@ -266,7 +277,7 @@ namespace Plugin.AudioRecorder
 		/// <returns>The full filepath to the recorded audio file, or null if no audio was detected during the last record.</returns>
 		public string GetAudioFilePath ()
 		{
-			return audioDetected ? filePath : null;
+			return audioDetected ? FilePath : null;
 		}
 	}
 }

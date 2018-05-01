@@ -1,7 +1,8 @@
-﻿using Android.Content;
+using Android.Content;
 using Android.Media;
 using System.IO;
 using System;
+using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
@@ -9,8 +10,6 @@ namespace Plugin.AudioRecorder
 	{
 		partial void Init ()
 		{
-			filePath = Path.Combine (Path.GetTempPath (), RecordingFileName);
-
 			if (Android.OS.Build.VERSION.SdkInt > Android.OS.BuildVersionCodes.JellyBean)
 			{
 				try
@@ -33,6 +32,11 @@ namespace Plugin.AudioRecorder
 					System.Diagnostics.Debug.WriteLine ("PreferredSampleRate will remain at the default");
 				}
 			}
+		}
+
+		Task<string> GetDefaultFilePath ()
+		{
+			return Task.FromResult(Path.Combine(Path.GetTempPath(), DefaultFileName));
 		}
 	}
 }

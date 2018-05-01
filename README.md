@@ -201,6 +201,14 @@ An example of the Task-based API and concurrent writing and reading of the audio
 	
 	Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.  Defaults to .2. Value should be between 0 and 1.
 
+- FilePath
+
+	```C#
+	string FilePath
+	```
+
+	Gets/sets the desired file path. If null it will be set automatically to a temporary file.
+
 
 # Limitations
 
