@@ -6,10 +6,11 @@
 *.user
 *.sln.docstates
 *.userprefs
+.vs
 
 # Xamarin.Android
-Resource.designer.cs
-Resources.designer.cs
+Resource.[Dd]esigner.cs
+Resources.[Dd]esigner.cs
 
 # Xamarin Components
 Components/
@@ -166,6 +167,7 @@ _UpgradeReport_Files/
 Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
+*.csproj.bak
 
 # SQL Server files
 *.mdf
