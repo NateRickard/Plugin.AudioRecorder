@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using Windows.Storage;
+using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
-    public partial class AudioRecorderService
-    {
-        async partial void Init()
-        {
-            StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
-            StorageFile tempFile = await temporaryFolder.CreateFileAsync(RecordingFileName, CreationCollisionOption.ReplaceExisting);
+	public partial class AudioRecorderService
+	{
+		partial void Init () { }
 
-            filePath = tempFile.Path;
-        }
-    }
+		async Task<string> GetDefaultFilePath ()
+		{
+			StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
+			StorageFile tempFile = await temporaryFolder.CreateFileAsync(DefaultFileName, CreationCollisionOption.ReplaceExisting);
+			return tempFile.Path;
+		}
+	}
 }
