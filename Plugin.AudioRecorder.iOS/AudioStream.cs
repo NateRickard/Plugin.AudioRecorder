@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Plugin.AudioRecorder
 {
 	internal class AudioStream : IAudioStream
-    {
+	{
 		const int DefaultBufferSize = 640;
 		readonly int bufferSize;
 
@@ -32,7 +32,8 @@ namespace Plugin.AudioRecorder
 		/// <value>
 		/// The sample rate.
 		/// </value>
-		public int SampleRate {
+		public int SampleRate
+		{
 			get;
 			private set;
 		}
@@ -53,42 +54,42 @@ namespace Plugin.AudioRecorder
 		public int BitsPerSample => 16;
 
 
-        /// <summary>
-        /// Gets a value indicating if the audio stream is active.
-        /// </summary>
+		/// <summary>
+		/// Gets a value indicating if the audio stream is active.
+		/// </summary>
 		public bool Active => audioQueue?.IsRunning ?? false;
 
 
-        /// <summary>
-        /// Starts the audio stream.
-        /// </summary>
-		public Task Start()
-        {
-            try
-            {
-                if (!Active)
-                {
+		/// <summary>
+		/// Starts the audio stream.
+		/// </summary>
+		public Task Start ()
+		{
+			try
+			{
+				if (!Active)
+				{
 					initAudioQueue ();
 
-					var result = audioQueue.Start();
+					var result = audioQueue.Start ();
 
 					if (result == AudioQueueStatus.Ok)
-                    {
-						OnActiveChanged?.Invoke(this, true);
-                    }
-                    else
-                    {
-                        throw new Exception($"audioQueue.Start() returned non-OK status: {result}");
-                    }
-                }
+					{
+						OnActiveChanged?.Invoke (this, true);
+					}
+					else
+					{
+						throw new Exception ($"audioQueue.Start() returned non-OK status: {result}");
+					}
+				}
 
-                return Task.FromResult(true);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error in AudioStream.Start(): {0}", ex);
-                throw;
-            }
+				return Task.FromResult (true);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex);
+				throw;
+			}
 		}
 
 
@@ -117,7 +118,7 @@ namespace Plugin.AudioRecorder
 		}
 
 
-        /// <summary>
+		/// <summary>
 		/// Initializes a new instance of the <see cref="AudioStream"/> class.
 		/// </summary>
 		/// <param name="sampleRate">Sample rate.</param>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -98,7 +98,7 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		public AudioRecorderService ()
 		{
-			Init();
+			Init ();
 		}
 
 
@@ -206,8 +206,8 @@ namespace Plugin.AudioRecorder
 		{
 			System.Diagnostics.Debug.WriteLine (reason);
 			audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
-			//since we're in the middle of handling a broadcast event when an audio timeout occurs, we need to break the StopRecording call on another thread
-			//	Otherwise, Bad. Things. Happen.
+																//since we're in the middle of handling a broadcast event when an audio timeout occurs, we need to break the StopRecording call on another thread
+																//	Otherwise, Bad. Things. Happen.
 			_ = Task.Run (() => StopRecording ());
 		}
 

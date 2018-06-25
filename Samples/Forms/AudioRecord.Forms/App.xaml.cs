@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+using System;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
+[assembly: XamlCompilation (XamlCompilationOptions.Compile)]
 namespace AudioRecord.Forms
 {
 	public partial class App : Application
@@ -13,7 +11,7 @@ namespace AudioRecord.Forms
 		{
 			InitializeComponent();
 
-			MainPage = new AudioRecord.Forms.MainPage();
+			MainPage = new MainPage();
 		}
 
 		protected override void OnStart ()

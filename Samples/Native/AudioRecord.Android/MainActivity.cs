@@ -1,28 +1,32 @@
 ﻿using Android.App;
 using Android.Widget;
 using Android.OS;
+using Android.Support.V7.App;
 using Plugin.AudioRecorder;
-using System.Threading.Tasks;
 using System;
-using Android.Media;
+using System.Threading.Tasks;
+using Android.Support.V4.Content;
+using Android;
+using Android.Content.PM;
+using Android.Support.V4.App;
 
-namespace AudioRecord.Droid
+namespace AudioRecord.Android
 {
-	[Activity (Label = "AudioRecord.Android", MainLauncher = true, Icon = "@mipmap/icon")]
-	public class MainActivity : Activity
-	{
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    public class MainActivity : AppCompatActivity
+    {
 		AudioRecorderService recorder;
-		MediaPlayer player;
+		AudioPlayer player;
 
 		Button recordButton;
 		Button playButton;
 
-		protected override void OnCreate (Bundle savedInstanceState)
-		{
-			base.OnCreate (savedInstanceState);
+		protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
 
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Main);
+            // Set our view from the "main" layout resource
+            SetContentView(Resource.Layout.activity_main);
 
 			// Get our button from the layout resource,
 			// and attach an event to it
@@ -31,8 +35,12 @@ namespace AudioRecord.Droid
 
 			recordButton.Click += RecordButton_Click;
 			playButton.Click += PlayButton_Click;
-		}
 
+			if (ContextCompat.CheckSelfPermission (this, Manifest.Permission.RecordAudio) != Permission.Granted)
+			{
+				ActivityCompat.RequestPermissions (this, new String [] { Manifest.Permission.RecordAudio }, 1);
+			}
+		}
 
 		protected override void OnStart ()
 		{
@@ -47,18 +55,16 @@ namespace AudioRecord.Droid
 			//alternative event-based API can be used here in lieu of the returned recordTask used below
 			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
 
-			player = new MediaPlayer ();
-			player.Completion += Player_Completion;
+			player = new AudioPlayer ();
+			player.FinishedPlaying += Player_FinishedPlaying;
 
 			recordButton.Enabled = true;
 		}
-
 
 		async void RecordButton_Click (object sender, EventArgs e)
 		{
 			await RecordAudio ();
 		}
-
 
 		async Task RecordAudio ()
 		{
@@ -103,7 +109,6 @@ namespace AudioRecord.Droid
 			}
 		}
 
-
 		void Recorder_AudioInputReceived (object sender, string audioFile)
 		{
 			RunOnUiThread (() =>
@@ -114,28 +119,23 @@ namespace AudioRecord.Droid
 			});
 		}
 
-
-		async void PlayButton_Click (object sender, EventArgs e)
+		void PlayButton_Click (object sender, EventArgs e)
 		{
-			await PlayRecordedAudio ();
+			PlayRecordedAudio ();
 		}
 
-
-		async Task PlayRecordedAudio ()
+		void PlayRecordedAudio ()
 		{
 			try
 			{
-				recordButton.Enabled = false;
-				playButton.Enabled = false;
-
 				var filePath = recorder.GetAudioFilePath ();
 
 				if (filePath != null)
 				{
-					player.Reset ();
-					await player.SetDataSourceAsync (filePath);
-					player.Prepare ();
-					player.Start ();
+					recordButton.Enabled = false;
+					playButton.Enabled = false;
+
+					player.Play (filePath);
 				}
 			}
 			catch (Exception ex)
@@ -145,11 +145,8 @@ namespace AudioRecord.Droid
 			}
 		}
 
-
-		private void Player_Completion (object sender, EventArgs e)
+		private void Player_FinishedPlaying (object sender, EventArgs e)
 		{
-			player.Stop ();
-
 			recordButton.Enabled = true;
 			playButton.Enabled = true;
 		}

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
@@ -9,7 +9,7 @@ namespace Plugin.AudioRecorder
 
 		Task<string> GetDefaultFilePath ()
 		{
-			return Task.FromResult(Path.Combine(Path.GetTempPath(), DefaultFileName));
+			return Task.FromResult (Path.Combine (Path.GetTempPath (), DefaultFileName));
 		}
 	}
 }

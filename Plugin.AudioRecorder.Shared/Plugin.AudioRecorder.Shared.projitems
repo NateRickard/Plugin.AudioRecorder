@@ -1,15 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>de10f7fa-4b7d-4fff-a40e-950cae663b76</SharedGUID>
+    <SharedGUID>{8EA2B3CD-E80A-420F-B7FC-6F36583C7FD5}</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>Plugin.AudioRecorder</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AudioFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AudioRecorderService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AudioStreamDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAudioStream.cs" />

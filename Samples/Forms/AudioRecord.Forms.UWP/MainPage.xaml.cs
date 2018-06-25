@@ -15,13 +15,13 @@ using Windows.UI.Xaml.Navigation;
 
 namespace AudioRecord.Forms.UWP
 {
-	public sealed partial class MainPage
-	{
-		public MainPage ()
-		{
-			this.InitializeComponent ();
+    public sealed partial class MainPage
+    {
+        public MainPage()
+        {
+            this.InitializeComponent();
 
-			LoadApplication (new AudioRecord.Forms.App ());
-		}
-	}
+            LoadApplication(new AudioRecord.Forms.App());
+        }
+    }
 }

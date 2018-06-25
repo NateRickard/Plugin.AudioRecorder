@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="28e4e208-0621-45ba-b48b-bd6e43cc044d" Publisher="CN=Administrator" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="28e4e208-0621-45ba-b48b-bd6e43cc044d" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="6182116f-c9f0-49e2-bd90-31f8b3379013" Publisher="CN=Administrator" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="6182116f-c9f0-49e2-bd90-31f8b3379013" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>AudioRecord.UWP</DisplayName>
     <PublisherDisplayName>Administrator</PublisherDisplayName>

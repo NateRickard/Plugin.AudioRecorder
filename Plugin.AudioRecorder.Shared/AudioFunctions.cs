@@ -103,8 +103,8 @@ namespace Plugin.AudioRecorder
 
 					if (signed)
 					{
-						short shortVal = (short)hiByte;
-						shortVal = (short)((shortVal << 8) | (byte)loByte);
+						short shortVal = (short) hiByte;
+						shortVal = (short) ((shortVal << 8) | (byte) loByte);
 						value = shortVal;
 					}
 					else
@@ -128,7 +128,7 @@ namespace Plugin.AudioRecorder
 					else
 					{
 						short shortVal = 0;
-						shortVal = (short)(shortVal | buffer [i]);
+						shortVal = (short) (shortVal | buffer [i]);
 						value = shortVal;
 					}
 
@@ -139,11 +139,11 @@ namespace Plugin.AudioRecorder
 			  // of 8 or 16 bits (signed or unsigned)
 			if (signed)
 			{
-				if (use16Bit) { level = (float)max / MAX_16_BITS_SIGNED; } else { level = (float)max / MAX_8_BITS_SIGNED; }
+				if (use16Bit) { level = (float) max / MAX_16_BITS_SIGNED; } else { level = (float) max / MAX_8_BITS_SIGNED; }
 			}
 			else
 			{
-				if (use16Bit) { level = (float)max / MAX_16_BITS_UNSIGNED; } else { level = (float)max / MAX_8_BITS_UNSIGNED; }
+				if (use16Bit) { level = (float) max / MAX_16_BITS_UNSIGNED; } else { level = (float) max / MAX_8_BITS_UNSIGNED; }
 			}
 
 			//System.Diagnostics.Debug.WriteLine ("LEVEL is {0}", level);

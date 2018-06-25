@@ -18,19 +18,17 @@ namespace AudioRecord.Forms
 			{
 				StopRecordingAfterTimeout = true,
 				TotalAudioTimeout = TimeSpan.FromSeconds (15),
-				AudioSilenceTimeout = TimeSpan.FromSeconds(2)
+				AudioSilenceTimeout = TimeSpan.FromSeconds (2)
 			};
 
 			player = new AudioPlayer ();
 			player.FinishedPlaying += Player_FinishedPlaying;
 		}
 
-
 		async void Record_Clicked (object sender, EventArgs e)
 		{
 			await RecordAudio ();
 		}
-
 
 		async Task RecordAudio ()
 		{
@@ -71,12 +69,10 @@ namespace AudioRecord.Forms
 			}
 		}
 
-
 		void Play_Clicked (object sender, EventArgs e)
 		{
 			PlayAudio ();
 		}
-
 
 		void PlayAudio ()
 		{
@@ -98,7 +94,6 @@ namespace AudioRecord.Forms
 				throw ex;
 			}
 		}
-
 
 		void Player_FinishedPlaying (object sender, EventArgs e)
 		{

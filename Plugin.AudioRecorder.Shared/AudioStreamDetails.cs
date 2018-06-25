@@ -3,8 +3,8 @@
 	/// <summary>
 	/// Represents the details of an <see cref="IAudioStream"/>, including channel count, sample rate, and bits per sample.
 	/// </summary>
-    public class AudioStreamDetails
-    {
+	public class AudioStreamDetails
+	{
 		/// <summary>
 		/// Gets the sample rate of the underlying audio stream.
 		/// </summary>
