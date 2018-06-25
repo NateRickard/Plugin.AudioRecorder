@@ -1,3 +1,5 @@
+<p align="left"><img src="logo/horizontalversion.png" alt="Plugin.AudioRecorder" height="100px"></p>
+
 # Audio Recorder plugin for Xamarin and Windows ![NuGet](https://img.shields.io/nuget/v/Plugin.AudioRecorder.svg?label=NuGet)
 
 Records audio on a device's microphone input.
@@ -69,8 +71,29 @@ More settings and properties are [defined below](#properties-and-settings)
 To begin recording, use the `StartRecording ()` and `StopRecording ()` methods as shown:
 
 ```C#
-async void RecordButton_Click (object sender, EventArgs e){	await RecordAudio ();}async Task RecordAudio (){	try	{		if (!recorder.IsRecording)		{			await recorder.StartRecording ();		}		else		{			await recorder.StopRecording ();		}	}	catch (Exception ex)	{
-	...	}}
+async void RecordButton_Click (object sender, EventArgs e)
+{
+	await RecordAudio ();
+}
+
+async Task RecordAudio ()
+{
+	try
+	{
+		if (!recorder.IsRecording)
+		{
+			await recorder.StartRecording ();
+		}
+		else
+		{
+			await recorder.StopRecording ();
+		}
+	}
+	catch (Exception ex)
+	{
+	...
+	}
+}
 ```
 
 In lieu of calling `StopRecording ()`, you can also make use of the `StopRecordingAfterTimeout` and/or `StopRecordingOnSilence` settings, which are [explained below](#properties-and-settings).
@@ -116,8 +139,10 @@ await recorder.StartRecording ();
 
 ...
 
-private async void Recorder_AudioInputReceived(object sender, string audioFile){
-	//do something with the file}
+private async void Recorder_AudioInputReceived(object sender, string audioFile)
+{
+	//do something with the file
+}
 ```
 
 **NOTE:** This event is raised on a background thread to allow for further file processing as needed.  If the `audioFile` is null or empty, no audio was recorded.
