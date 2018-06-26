@@ -203,54 +203,63 @@ An example of the Task-based API and concurrent writing and reading of the audio
 
 - IsRecording
 
-	```C#
-	bool IsRecording
-	```
+    ```C#
+    bool IsRecording
+    ```
 
-	Returns a value indicating if the AudioRecorderService is currently recording audio.
+    Returns a value indicating if the AudioRecorderService is currently recording audio.
 
 - StopRecordingAfterTimeout / TotalAudioTimeout
 
-	```C#
-	bool StopRecordingAfterTimeout
-	```
+    ```C#
+    bool StopRecordingAfterTimeout
+    ```
 	
-	Gets/sets a value indicating if the AudioRecorderService should stop recording after a certain amount of time.  Default is `true`.
+    Gets/sets a value indicating if the AudioRecorderService should stop recording after a certain amount of time.  Default is `true`.
 
-	```C#
-	TimeSpan TotalAudioTimeout
-	```
+    ```C#
+    TimeSpan TotalAudioTimeout
+    ```
 
-	_If_ `StopRecordingAfterTimeout` is set to `true`, this `TimeSpan` indicates the total amount of time to record audio for before recording is stopped. Defaults to 30 seconds.
+    _If_ `StopRecordingAfterTimeout` is set to `true`, this `TimeSpan` indicates the total amount of time to record audio for before recording is stopped. Defaults to 30 seconds.
 
 - StopRecordingOnSilence / AudioSilenceTimeout
 
-	```C#
-	bool StopRecordingOnSilence
-	```
+    ```C#
+    bool StopRecordingOnSilence
+    ```
 	
-	Gets/sets a value indicating if the AudioRecorderService should stop recording after silence (low audio signal) is detected.  Default is `true`.
+    Gets/sets a value indicating if the AudioRecorderService should stop recording after silence (low audio signal) is detected.  Default is `true`.
 	
-	```C#
-	TimeSpan AudioSilenceTimeout
-	```
-	_If_ `StopRecordingOnSilence ` is set to `true`, this `TimeSpan` indicates the amount of 'silent' time is required before recording is stopped. Defaults to 2 seconds.
+    ```C#
+    TimeSpan AudioSilenceTimeout
+    ```
+	
+    _If_ `StopRecordingOnSilence ` is set to `true`, this `TimeSpan` indicates the amount of 'silent' time is required before recording is stopped. Defaults to 2 seconds.
 
 - SilenceThreshold
 
-	```C#
-	float SilenceThreshold
-	```
+    ```C#
+    float SilenceThreshold
+    ```
 	
-	Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.  Defaults to .2. Value should be between 0 and 1.
+    Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.  Defaults to .2. Value should be between 0 and 1.
 
 - FilePath
 
-	```C#
-	string FilePath
-	```
+    ```C#
+    string FilePath
+    ```
 
-	Gets/sets the desired file path. If null it will be set automatically to a temporary file.
+    Gets/sets the desired file path. If null it will be set automatically to a temporary file.
+
+- ConfigureAVAudioSession (iOS only)
+
+    ```C#
+    static bool ConfigureAVAudioSession
+    ```
+        
+    Gets/sets whether the `AudioRecorderService` should attempt to control the shared [`AVAudioSession` category](https://developer.apple.com/documentation/avfoundation/avaudiosession?changes=_3&language=objc).  This can be set from the `AppDelegate` ([example](https://github.com/NateRickard/Plugin.AudioRecorder/blob/b02c424a35ddd6f42ce349151e63e49e4c1de912/Samples/Forms/AudioRecord.Forms.iOS/AppDelegate.cs#L26)) or other iOS-specific class.  When set to `true`, the `AudioRecorderService` will attempt to set the category to `Record` before recording, and restore the category to its previous value after recording is complete.  Defaults to `false`.
 
 
 # Limitations
