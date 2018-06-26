@@ -270,6 +270,21 @@ Complete samples demonstrating audio recording (`AudioRecorderService`) and play
 
 Contributions are welcome.  Feel free to file issues and pull requests on the repo and they'll be reviewed as time permits.
 
+## Building
+
+This solution requires the following environment/config:
+
+- Visual Studio 2017 or above
+    - You _may_ be able to load and build the iOS/Android targets on Visual Studio for Mac
+- If you want to build the NuGet package (for some reason):
+    - [Nugetizer 3000](https://github.com/NuGet/NuGet.Build.Packaging) setup:
+        - Install the [Visual Studio extension](http://bit.ly/nugetizer-2017)
+        - Nugetizer 3000 [CI NuGet package source](https://ci.appveyor.com/nuget/nugetizer3000) for development builds of `NuGet.Build.Packaging`
+
+## Debugging
+
+The easiest way to debug this library is to clone this repo and copy the shared library + platform project (of the platform you're debugging with) into your solution folder, then include the projects in your solution and reference them directly, rather than referencing the NuGet package.
+
 
 # About
 
