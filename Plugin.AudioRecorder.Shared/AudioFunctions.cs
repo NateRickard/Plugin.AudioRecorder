@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -128,7 +128,9 @@ namespace Plugin.AudioRecorder
 					else
 					{
 						short shortVal = 0;
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 						shortVal = (short) (shortVal | buffer [i]);
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
 						value = shortVal;
 					}
 

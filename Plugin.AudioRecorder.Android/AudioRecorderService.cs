@@ -1,4 +1,4 @@
-﻿using Android.Content;
+using Android.Content;
 using Android.Media;
 using System.IO;
 using System;
@@ -35,6 +35,14 @@ namespace Plugin.AudioRecorder
 		Task<string> GetDefaultFilePath ()
 		{
 			return Task.FromResult (Path.Combine (Path.GetTempPath (), DefaultFileName));
+		}
+
+		void OnRecordingStarting ()
+		{
+		}
+
+		void OnRecordingStopped ()
+		{
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AudioToolbox;
 using System.Threading.Tasks;
 
@@ -69,7 +69,7 @@ namespace Plugin.AudioRecorder
 			{
 				if (!Active)
 				{
-					initAudioQueue ();
+					InitAudioQueue ();
 
 					var result = audioQueue.Start ();
 
@@ -130,7 +130,7 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		void initAudioQueue ()
+		void InitAudioQueue ()
 		{
 			var audioFormat = new AudioStreamBasicDescription
 			{

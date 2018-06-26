@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Foundation;
+using Plugin.AudioRecorder;
 using UIKit;
 
 namespace AudioRecord.Forms.iOS
 {
-    // The UIApplicationDelegate for the application. This class is responsible for launching the 
-    // User Interface of the application, as well as listening (and optionally responding) to 
-    // application events from iOS.
-    [Register("AppDelegate")]
+	// The UIApplicationDelegate for the application. This class is responsible for launching the 
+	// User Interface of the application, as well as listening (and optionally responding) to 
+	// application events from iOS.
+	[Register("AppDelegate")]
     public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
     {
         //
@@ -25,7 +22,10 @@ namespace AudioRecord.Forms.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
-            return base.FinishedLaunching(app, options);
+			// this controls whether the library will attempt to force the shared AVAudioSession into recording mode, and then reset it after recording completes
+			AudioRecorderService.ConfigureAVAudioSession = true;
+
+			return base.FinishedLaunching(app, options);
         }
     }
 }

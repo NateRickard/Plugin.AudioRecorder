@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Windows.Storage;
 using System.Threading.Tasks;
 
@@ -13,6 +13,14 @@ namespace Plugin.AudioRecorder
 			StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
 			StorageFile tempFile = await temporaryFolder.CreateFileAsync (DefaultFileName, CreationCollisionOption.ReplaceExisting);
 			return tempFile.Path;
+		}
+
+		void OnRecordingStarting ()
+		{
+		}
+
+		void OnRecordingStopped ()
+		{
 		}
 	}
 }

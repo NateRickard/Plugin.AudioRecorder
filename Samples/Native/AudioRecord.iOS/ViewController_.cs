@@ -1,4 +1,3 @@
-﻿using Foundation;
 using Plugin.AudioRecorder;
 using System;
 using System.Threading.Tasks;
@@ -6,13 +5,15 @@ using UIKit;
 
 namespace Blank
 {
-    public partial class ViewController : UIViewController
+	public partial class ViewController : UIViewController
     {
         AudioRecorderService recorder;
 		AudioPlayer player;
 
 		public ViewController (IntPtr handle) : base (handle)
 		{
+			// this controls whether the library will attempt to force the shared AVAudioSession into recording mode, and then reset it after recording completes
+			AudioRecorderService.ConfigureAVAudioSession = true;
 		}
 
 		public override void ViewDidLoad ()
@@ -26,6 +27,7 @@ namespace Blank
 			};
 
 			player = new AudioPlayer ();
+			player.FinishedPlaying += Player_FinishedPlaying;
 
 			//alternative event-based API can be used here in lieu of the returned recordTask used below
 			//recorder.AudioInputReceived += Recorder_AudioInputReceived;
@@ -106,6 +108,12 @@ namespace Blank
 				//blow up the app!
 				throw ex;
 			}
+		}
+
+		void Player_FinishedPlaying (object sender, EventArgs e)
+		{
+			PlayButton.Enabled = true;
+			RecordButton.Enabled = true;
 		}
 	}
 }

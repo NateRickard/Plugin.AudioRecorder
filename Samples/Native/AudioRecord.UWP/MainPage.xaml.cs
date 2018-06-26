@@ -1,7 +1,5 @@
-﻿using Plugin.AudioRecorder;
+using Plugin.AudioRecorder;
 using System;
-using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -115,6 +115,7 @@ namespace Plugin.AudioRecorder
 			}
 
 			ResetAudioDetection ();
+			OnRecordingStarting ();
 
 			InitializeStream (PreferredSampleRate);
 
@@ -154,24 +155,9 @@ namespace Plugin.AudioRecorder
 		}
 
 
-		//private IEnumerable<short> Decode(byte[] byteArray)
-		//{
-		//    for (var i = 0; i < byteArray.Length - 1; i += 2)
-		//    {
-		//        yield return (BitConverter.ToInt16(byteArray, i));
-		//    }
-		//}
-
-
 		void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
-			var level = AudioFunctions.CalculateLevel (bytes);//, bigEndian: true);//, bigEndian: true, signed: false);
-
-			//var level = Decode(bytes).Select(Math.Abs).Average(x => x);
-
-			//double level = Math.Sqrt(sum / (bytes.Length / 2));
-
-			//System.Diagnostics.Debug.WriteLine ("AudioStream_OnBroadcast :: calculateLevel == {0}", level);
+			var level = AudioFunctions.CalculateLevel (bytes);
 
 			if (level > SilenceThreshold) //did we find a signal?
 			{
@@ -185,7 +171,7 @@ namespace Plugin.AudioRecorder
 				{
 					if (DateTime.Now.Subtract (silenceTime.Value) > AudioSilenceTimeout)
 					{
-						timeout ("AudioRecorderService.AudioStream_OnBroadcast (): AudioSilenceTimeout exceeded, stopping recording");
+						Timeout ("AudioRecorderService.AudioStream_OnBroadcast (): AudioSilenceTimeout exceeded, stopping recording");
 						return;
 					}
 				}
@@ -197,12 +183,12 @@ namespace Plugin.AudioRecorder
 
 			if (StopRecordingAfterTimeout && DateTime.Now - startTime > TotalAudioTimeout)
 			{
-				timeout ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
+				Timeout ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
 			}
 		}
 
 
-		void timeout (string reason)
+		void Timeout (string reason)
 		{
 			System.Diagnostics.Debug.WriteLine (reason);
 			audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
@@ -230,6 +216,8 @@ namespace Plugin.AudioRecorder
 			{
 				System.Diagnostics.Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
+
+			OnRecordingStopped ();
 
 			var returnedFilePath = GetAudioFilePath ();
 			//complete the recording Task for anthing waiting on this
