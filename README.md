@@ -2,31 +2,36 @@
 
 # Audio Recorder plugin for Xamarin and Windows ![NuGet](https://img.shields.io/nuget/v/Plugin.AudioRecorder.svg?label=NuGet)
 
-Records audio on a device's microphone input.
+Features:
+
+- Records audio on a device's microphone input
+- Allows access to recorded audio via file or `Stream`
+- Configurable silence detection to automatically end recording
+- Simple event and `Task`-based APIs
+- Cross platform `AudioPlayer` included
 
 # Setup
 
 - Available on NuGet: https://www.nuget.org/packages/Plugin.AudioRecorder
-- Install into your PCL project and any platform-specific libraries required for your app.
+- Install into your platform-specific projects (iOS/Android/UWP), and any PCL/.NET Standard 2.0 projects required for your app.
 
 ## Platform Support
 
 |Platform|Supported|Version|
 | ------------------- | :-----------: | :------------------: |
 |Xamarin.iOS|Yes|iOS 7+|
-|Xamarin.iOS Unified|Yes|iOS 7+|
 |Xamarin.Android|Yes|API 16+|
-|Windows Phone Silverlight|No||
-|Windows Phone RT|No||
-|Windows Store RT|No||
-|Windows 10 UWP|Yes|10+|
-|Xamarin.Mac|No||
+|Windows UWP|Yes|10.0 build 15063 and up|
 
-**_Supports both classic Xamarin.iOS / Xamarin.Android and Xamarin.Forms_**
+**Notes:**
 
-### Permissions
+- Supports both native Xamarin.iOS / Xamarin.Android and Xamarin.Forms projects.
+- Contains reference assemblies to use the library from PCL projects (profile 111) and .NET Standard 2.0 projects.
+    - Please note the PCL/.NET Standard support is via ["bait & switch"](https://log.paulbetts.org/the-bait-and-switch-pcl-trick/), and this will ONLY work alongside the proper platform-specific DLLs/NuGet packages in place.
 
-The following permissions are required on each platform:
+### Required Permissions & Capabilities
+
+The following permissions/capabilities are required to be configured on each platform:
 
 #### Android
 
@@ -37,7 +42,22 @@ The following permissions are required on each platform:
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
+Additionally, on OS versions Marshmallow and above, you may need to perform a runtime check to ask the user to access their microphone.
+
+Example:
+
+Do this in your main activity or at the point you'll be needing access to record audio:
+
+```C#
+if (ContextCompat.CheckSelfPermission (this, Manifest.Permission.RecordAudio) != Permission.Granted)
+{
+	ActivityCompat.RequestPermissions (this, new String [] { Manifest.Permission.RecordAudio }, 1);
+}
+```
+
 #### iOS
+
+For iOS 10 and above, you must set the `NSMicrophoneUsageDescription` in your Info.plist:
 
 ```XML
 <key>NSMicrophoneUsageDescription</key>
@@ -46,7 +66,7 @@ The following permissions are required on each platform:
 
 #### UWP
 
-You must check the `Internet` and `Microphone` capabilities in your app's Package.appxmanifest file.
+You must check the `Internet` and `Microphone` capabilities in your app's `Package.appxmanifest` file.
 
 
 # Usage
@@ -162,9 +182,7 @@ There are multiple ways to access the recorded audio file path:
 
 These will all return `null` in the case that no audio has been recorded yet or no audio was recorded/detected in the last recording session.
 
-Once you have the path to the recorded audio file, you can use standard `FileStream` operations and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
-
-Complete samples demonstrating audio recording and playback of the recorded file are available in the /Samples folder.
+Once you have the path to the recorded audio file, you can use standard file operations (for native/.NET Standard) and/or a cross platform file system abstraction like [PCLStorage](https://github.com/dsplaisted/PCLStorage) to get a stream to the file data.
 
 
 ### Concurrent Streaming
@@ -238,7 +256,14 @@ An example of the Task-based API and concurrent writing and reading of the audio
 # Limitations
 
 - Currently this is only recording in WAV audio format (due to original use case this was developed for).
-- Signal detection (`StopRecordingOnSilence`) is not currently working well/at all on UWP.
+
+
+# Samples
+
+Complete samples demonstrating audio recording (`AudioRecorderService`) and playback (`AudioPlayer`) of the recorded file are available in the /Samples folder:
+
+- [Xamarin.Forms](https://github.com/NateRickard/Plugin.AudioRecorder/tree/master/Samples/Forms) (.NET Standard) containing iOS, Android, and UWP apps.
+- [Native](https://github.com/NateRickard/Plugin.AudioRecorder/tree/master/Samples/Native) iOS, Android, and UWP apps.
 
 
 # Contributing
