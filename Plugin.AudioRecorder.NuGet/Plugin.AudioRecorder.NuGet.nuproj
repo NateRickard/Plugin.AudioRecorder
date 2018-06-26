@@ -11,6 +11,7 @@
     <PackageTags>xamarin, pcl, xam.pcl, plugin, plugin for xamarin, android, UWP, universal windows, xamarin.forms, ios, microphone, audio, record</PackageTags>
     <ReferenceAssemblyFrameworks>.NETPortable,Version=v4.5,Profile=Profile111</ReferenceAssemblyFrameworks>
     <IntersectionAssemblyReferencePath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v8.1\</IntersectionAssemblyReferencePath>
+    <PackageIconUrl>https://raw.githubusercontent.com/NateRickard/Plugin.AudioRecorder/9c4b2606/logo/icon-nuget.png</PackageIconUrl>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
