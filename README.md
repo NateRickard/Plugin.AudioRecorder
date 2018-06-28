@@ -259,7 +259,7 @@ An example of the Task-based API and concurrent writing and reading of the audio
     static bool ConfigureAVAudioSession
     ```
         
-    Gets/sets whether the `AudioRecorderService` should attempt to control the shared [`AVAudioSession` category](https://developer.apple.com/documentation/avfoundation/avaudiosession?changes=_3&language=objc).  This can be set from the `AppDelegate` ([example](https://github.com/NateRickard/Plugin.AudioRecorder/blob/b02c424a35ddd6f42ce349151e63e49e4c1de912/Samples/Forms/AudioRecord.Forms.iOS/AppDelegate.cs#L26)) or other iOS-specific class.  When set to `true`, the `AudioRecorderService` will attempt to set the category to `Record` before recording, and restore the category to its previous value after recording is complete.  Defaults to `false`.
+    Gets/sets whether the `AudioRecorderService` should attempt to control the shared [`AVAudioSession` category](https://developer.apple.com/documentation/avfoundation/avaudiosession?changes=_3&language=objc).  This can be set from the `AppDelegate` ([example](https://github.com/NateRickard/Plugin.AudioRecorder/blob/b02c424a35ddd6f42ce349151e63e49e4c1de912/Samples/Forms/AudioRecord.Forms.iOS/AppDelegate.cs#L26)) or other iOS-specific class.  When set to `true`, the `AudioRecorderService` will attempt to set the category to `Record` before recording, and restore the category to its previous value after recording is complete.  This can help this plugin coexist with [other media plugins that try to unilaterally set the category](https://github.com/NateRickard/Plugin.AudioRecorder/issues/5).  Defaults to `false`.
 
 
 # Limitations
