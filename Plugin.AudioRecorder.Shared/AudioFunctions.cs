@@ -34,7 +34,10 @@ namespace Plugin.AudioRecorder
 
 		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int audioLength = -1)
 		{
-			writer.Seek (0, SeekOrigin.Begin);
+			if (writer.BaseStream.CanSeek)
+			{
+				writer.Seek (0, SeekOrigin.Begin);
+			}
 
 			//chunk ID
 			writer.Write ('R');
