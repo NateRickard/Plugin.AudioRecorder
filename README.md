@@ -18,10 +18,10 @@ Features:
 ## Platform Support
 
 |Platform|Supported|Version|
-| ------------------- | :-----------: | :------------------: |
-|Xamarin.iOS|Yes|iOS 7+|
-|Xamarin.Android|Yes|API 16+|
-|Windows UWP|Yes|10.0 build 15063 and up|
+| ------------------- | :-----------: | :------------------: | :------------------: |
+|Xamarin.iOS|Yes|iOS 7+||
+|Xamarin.Android|Yes|API 16+|Project should target Android framework 8.1+|
+|Windows UWP|Yes|10.0|Build 15063 and up|
 
 **Notes:**
 
