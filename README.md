@@ -20,7 +20,7 @@ Features:
 |Platform|Supported|Version|Notes|
 | ------------------- | :-----------: | :------------------: | :------------------: |
 |Xamarin.iOS|Yes|iOS 7+| |
-|Xamarin.Android|Yes|API 16+|Project should target Android framework 8.1+|
+|Xamarin.Android|Yes|API 16+|Project should [target Android framework 8.1+](https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-api-levels?tabs=vswin#framework)|
 |Windows UWP|Yes|10.0|Build 15063 and up|
 
 **Notes:**
