@@ -1,5 +1,6 @@
-using System;
 using AudioToolbox;
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
@@ -87,7 +88,9 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex);
+				Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex.Message);
+
+				Stop ();
 				throw;
 			}
 		}
@@ -98,20 +101,23 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		public Task Stop ()
 		{
-			audioQueue.InputCompleted -= QueueInputCompleted;
-
-			var result = audioQueue.Stop (true);
-
-			audioQueue.Dispose ();
-			audioQueue = null;
-
-			if (result == AudioQueueStatus.Ok)
+			if (audioQueue != null)
 			{
-				OnActiveChanged?.Invoke (this, false);
-			}
-			else
-			{
-				System.Diagnostics.Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
+				audioQueue.InputCompleted -= QueueInputCompleted;
+
+				var result = audioQueue.Stop (true);
+
+				audioQueue.Dispose ();
+				audioQueue = null;
+
+				if (result == AudioQueueStatus.Ok)
+				{
+					OnActiveChanged?.Invoke (this, false);
+				}
+				else
+				{
+					Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
+				}
 			}
 
 			return Task.FromResult (true);
@@ -181,7 +187,7 @@ namespace Plugin.AudioRecorder
 				//broadcast the audio data to any listeners
 				OnBroadcast?.Invoke (this, audioBytes);
 
-				//check for null/active again, because the auto stop logic may stop the audio queue from within this handler!
+				//check if active again, because the auto stop logic may stop the audio queue from within this handler!
 				if (Active)
 				{
 					var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
@@ -195,7 +201,9 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("AudioStream.QueueInputCompleted() :: Error: {0}", ex);
+				Debug.WriteLine ("AudioStream.QueueInputCompleted() :: Error: {0}", ex.Message);
+
+				OnException?.Invoke (this, new Exception ($"AudioStream.QueueInputCompleted() :: Error: {ex.Message}"));
 			}
 		}
 	}

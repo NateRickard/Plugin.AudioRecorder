@@ -1,15 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
 using Android.Media;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
 	internal class AudioStream : IAudioStream
 	{
 		readonly int bufferSize;
-
-		ChannelIn channels = ChannelIn.Mono;
-		Encoding audioFormat = Encoding.Pcm16bit;
+		readonly ChannelIn channels = ChannelIn.Mono;
+		readonly Encoding audioFormat = Encoding.Pcm16bit;
 
 		/// <summary>
 		/// The audio source.
@@ -73,12 +73,9 @@ namespace Plugin.AudioRecorder
 		public bool Active => audioSource?.RecordingState == RecordState.Recording;
 
 
-		void init ()
+		void Init ()
 		{
-			if (audioSource != null)
-			{
-				Stop ();
-			}
+			Stop (); //just in case
 
 			audioSource = new AudioRecord (
 				DefaultDevice,
@@ -106,7 +103,7 @@ namespace Plugin.AudioRecorder
 					//not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
 					Android.OS.Process.SetThreadPriority (Android.OS.ThreadPriority.UrgentAudio);
 
-					init ();
+					Init ();
 
 					audioSource.StartRecording ();
 
@@ -119,9 +116,9 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				Stop ();
+				Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex.Message);
 
-				System.Diagnostics.Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex);
+				Stop ();
 				throw;
 			}
 		}
@@ -141,7 +138,7 @@ namespace Plugin.AudioRecorder
 			}
 			else //just in case
 			{
-				audioSource.Release ();
+				audioSource?.Release ();
 			}
 
 			return Task.FromResult (true);
@@ -178,7 +175,7 @@ namespace Plugin.AudioRecorder
 			int readFailureCount = 0;
 			int readResult = 0;
 
-			System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Starting background loop to read audio stream");
+			Debug.WriteLine ("AudioStream.Record(): Starting background loop to read audio stream");
 
 			while (Active)
 			{
@@ -187,7 +184,7 @@ namespace Plugin.AudioRecorder
 					//not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
 					if (readFailureCount > 1)
 					{
-						System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
+						Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
 						await Stop ();
 						break;
 					}
@@ -207,13 +204,13 @@ namespace Plugin.AudioRecorder
 							case (int) TrackStatus.ErrorInvalidOperation:
 							case (int) TrackStatus.ErrorBadValue:
 							case (int) TrackStatus.ErrorDeadObject:
-								System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
+								Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
 								await Stop ();
 								break;
 							//case (int)TrackStatus.Error:
 							default:
 								readFailureCount++;
-								System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
+								Debug.WriteLine ("AudioStream.Record(): readResult returned error code: {0}", readResult);
 								break;
 						}
 					}
@@ -222,7 +219,7 @@ namespace Plugin.AudioRecorder
 				{
 					readFailureCount++;
 
-					System.Diagnostics.Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex);
+					Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
 
 					OnException?.Invoke (this, ex);
 				}

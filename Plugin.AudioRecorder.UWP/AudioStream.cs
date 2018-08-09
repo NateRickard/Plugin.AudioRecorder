@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
@@ -108,7 +109,6 @@ namespace Plugin.AudioRecorder
 					var profile = MediaEncodingProfile.CreateWav (AudioEncodingQuality.Low);
 					profile.Audio = AudioEncodingProperties.CreatePcm ((uint) SampleRate, (uint) ChannelCount, (uint) BitsPerSample);
 
-
 					await capture.StartRecordToStreamAsync (profile, stream);
 
 					Active = true;
@@ -119,8 +119,9 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				Active = false;
-				System.Diagnostics.Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex);
+				Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex.Message);
+
+				await Stop ();
 				throw;
 			}
 		}
@@ -141,7 +142,7 @@ namespace Plugin.AudioRecorder
 			{
 				Active = false;
 
-				await capture.StopRecordAsync ();
+				await capture?.StopRecordAsync ();
 				stream?.Dispose ();
 				capture?.Dispose ();
 
@@ -188,7 +189,7 @@ namespace Plugin.AudioRecorder
 							//not sure if this is even a good idea (likely no), but we'll try to allow a single bad read, and past that shut it down
 							if (readFailureCount > 1)
 							{
-								System.Diagnostics.Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
+								Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
 								await Stop ();
 								break;
 							}
@@ -201,20 +202,20 @@ namespace Plugin.AudioRecorder
 								byte [] bytes = new byte [loadResult];
 								reader.ReadBytes (bytes);
 
-								//System.Diagnostics.Debug.WriteLine("AudioStream.Record(): Read {0} bytes, broadcasting {1} bytes", loadResult, bytes.Length);
+								//Debug.WriteLine("AudioStream.Record(): Read {0} bytes, broadcasting {1} bytes", loadResult, bytes.Length);
 
 								OnBroadcast?.Invoke (this, bytes);
 							}
 							else
 							{
-								//System.Diagnostics.Debug.WriteLine("AudioStream.Record(): Non positive readResult returned: {0}", loadResult);
+								//Debug.WriteLine("AudioStream.Record(): Non positive readResult returned: {0}", loadResult);
 							}
 						}
 						catch (Exception ex)
 						{
 							readFailureCount++;
 
-							System.Diagnostics.Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex);
+							Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
 							OnException?.Invoke (this, ex);
 						}
 					}
@@ -222,7 +223,7 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex);
+				Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
 				OnException?.Invoke (this, ex);
 			}
 		}

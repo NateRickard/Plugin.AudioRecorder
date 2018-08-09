@@ -1,6 +1,6 @@
 using System;
-using Windows.Storage;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Plugin.AudioRecorder
 {
@@ -10,8 +10,9 @@ namespace Plugin.AudioRecorder
 
 		async Task<string> GetDefaultFilePath ()
 		{
-			StorageFolder temporaryFolder = ApplicationData.Current.TemporaryFolder;
-			StorageFile tempFile = await temporaryFolder.CreateFileAsync (DefaultFileName, CreationCollisionOption.ReplaceExisting);
+			var temporaryFolder = ApplicationData.Current.TemporaryFolder;
+			var tempFile = await temporaryFolder.CreateFileAsync (DefaultFileName, CreationCollisionOption.ReplaceExisting);
+
 			return tempFile.Path;
 		}
 

@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,7 +54,9 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.StartRecorder(): {0}", ex);
+				Debug.WriteLine ("Error in WaveRecorder.StartRecorder(): {0}", ex.Message);
+
+				StopRecorder ();
 				throw;
 			}
 		}
@@ -91,7 +94,7 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error in WaveRecorder.OnStreamBroadcast(): {0}", ex);
+				Debug.WriteLine ("Error in WaveRecorder.OnStreamBroadcast(): {0}", ex.Message);
 
 				StopRecorder ();
 			}
@@ -130,7 +133,7 @@ namespace Plugin.AudioRecorder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine ("Error during StopRecorder: {0}", ex);
+				Debug.WriteLine ("Error during StopRecorder: {0}", ex.Message);
 				throw;
 			}
 		}

@@ -1,6 +1,7 @@
 using AVFoundation;
 using Foundation;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,6 +11,10 @@ namespace Plugin.AudioRecorder
 	{
 		NSString currentAVAudioSessionCategory;
 
+		/// <summary>
+		/// Set to <c>true</c> in your iOS project if you'd like the <see cref="AudioRecorderService"/> to set the shared <see cref="AVAudioSession"/> 
+		/// category to <see cref="AVAudioSession.CategoryRecord"/> before recording and return it to its previous value after recording is complete.
+		/// </summary>
 		public static bool ConfigureAVAudioSession { get; set; }
 
 		partial void Init () { }
@@ -60,7 +65,7 @@ namespace Plugin.AudioRecorder
 					else
 					{
 						// we won't error out here as this likely won't prevent us from stopping properly... but we will log an issue
-						System.Diagnostics.Debug.WriteLine ($"Error attempting to set the AVAudioSession category back to {currentAVAudioSessionCategory}");
+						Debug.WriteLine ($"Error attempting to set the AVAudioSession category back to {currentAVAudioSessionCategory}");
 					}
 				}
 			}

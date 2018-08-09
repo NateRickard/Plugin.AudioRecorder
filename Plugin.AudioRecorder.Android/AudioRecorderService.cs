@@ -1,7 +1,8 @@
 using Android.Content;
 using Android.Media;
-using System.IO;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
@@ -20,14 +21,14 @@ namespace Plugin.AudioRecorder
 
 					if (!string.IsNullOrEmpty (property) && int.TryParse (property, out int sampleRate))
 					{
-						System.Diagnostics.Debug.WriteLine ($"Setting PreferredSampleRate to {sampleRate} as reported by AudioManager.PropertyOutputSampleRate");
+						Debug.WriteLine ($"Setting PreferredSampleRate to {sampleRate} as reported by AudioManager.PropertyOutputSampleRate");
 						PreferredSampleRate = sampleRate;
 					}
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine ("Error using AudioManager to get AudioManager.PropertyOutputSampleRate: {0}", ex);
-					System.Diagnostics.Debug.WriteLine ("PreferredSampleRate will remain at the default");
+					Debug.WriteLine ("Error using AudioManager to get AudioManager.PropertyOutputSampleRate: {0}", ex);
+					Debug.WriteLine ("PreferredSampleRate will remain at the default");
 				}
 			}
 		}
