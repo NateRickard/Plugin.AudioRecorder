@@ -19,7 +19,7 @@
     <ProjectGuid>{7ED9AE4B-267C-47C0-A816-797FBD080188}</ProjectGuid>
     <Description>Multiplatform library for recording device microphone input</Description>
     <PackageId>Plugin.AudioRecorder</PackageId>
-    <PackageVersion>1.0.1</PackageVersion>
+    <PackageVersion>1.0.2</PackageVersion>
     <Authors>Nate Rickard</Authors>
     <DevelopmentDependency>false</DevelopmentDependency>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
