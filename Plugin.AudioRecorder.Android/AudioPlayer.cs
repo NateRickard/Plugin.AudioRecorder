@@ -1,11 +1,11 @@
-﻿using Android.Media;
+using Android.Media;
 using System;
 
 namespace Plugin.AudioRecorder
 {
 	public partial class AudioPlayer
 	{
-		private MediaPlayer _mediaPlayer;
+		private MediaPlayer mediaPlayer;
 
 		public AudioPlayer ()
 		{
@@ -13,30 +13,30 @@ namespace Plugin.AudioRecorder
 
 		public void Play (string pathToAudioFile)
 		{
-			if (_mediaPlayer != null)
+			if (mediaPlayer != null)
 			{
-				_mediaPlayer.Completion -= MediaPlayer_Completion;
-				_mediaPlayer.Stop ();
+				mediaPlayer.Completion -= MediaPlayer_Completion;
+				mediaPlayer.Stop ();
 			}
 
 			if (pathToAudioFile != null)
 			{
-				if (_mediaPlayer == null)
+				if (mediaPlayer == null)
 				{
-					_mediaPlayer = new MediaPlayer ();
+					mediaPlayer = new MediaPlayer ();
 
-					_mediaPlayer.Prepared += (sender, args) =>
+					mediaPlayer.Prepared += (sender, args) =>
 					{
-						_mediaPlayer.Start ();
-						_mediaPlayer.Completion += MediaPlayer_Completion;
+						mediaPlayer.Start ();
+						mediaPlayer.Completion += MediaPlayer_Completion;
 					};
 				}
 
-				_mediaPlayer.Reset ();
+				mediaPlayer.Reset ();
 				//_mediaPlayer.SetVolume (1.0f, 1.0f);
 
-				_mediaPlayer.SetDataSource (pathToAudioFile);
-				_mediaPlayer.PrepareAsync ();
+				mediaPlayer.SetDataSource (pathToAudioFile);
+				mediaPlayer.PrepareAsync ();
 			}
 		}
 
@@ -47,12 +47,12 @@ namespace Plugin.AudioRecorder
 
 		public void Pause ()
 		{
-			_mediaPlayer?.Pause ();
+			mediaPlayer?.Pause ();
 		}
 
 		public void Play ()
 		{
-			_mediaPlayer?.Start ();
+			mediaPlayer?.Start ();
 		}
 	}
 }
