@@ -12,6 +12,7 @@
     <ReferenceAssemblyFrameworks>.NETPortable,Version=v4.5,Profile=Profile111</ReferenceAssemblyFrameworks>
     <IntersectionAssemblyReferencePath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v8.1\</IntersectionAssemblyReferencePath>
     <PackageIconUrl>https://raw.githubusercontent.com/NateRickard/Plugin.AudioRecorder/9c4b2606/logo/icon-nuget.png</PackageIconUrl>
+    <GenerateSymbolPackage>true</GenerateSymbolPackage>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -19,7 +20,7 @@
     <ProjectGuid>{7ED9AE4B-267C-47C0-A816-797FBD080188}</ProjectGuid>
     <Description>Multiplatform library for recording device microphone input</Description>
     <PackageId>Plugin.AudioRecorder</PackageId>
-    <PackageVersion>1.0.2</PackageVersion>
+    <PackageVersion>1.0.2-pre</PackageVersion>
     <Authors>Nate Rickard</Authors>
     <DevelopmentDependency>false</DevelopmentDependency>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
