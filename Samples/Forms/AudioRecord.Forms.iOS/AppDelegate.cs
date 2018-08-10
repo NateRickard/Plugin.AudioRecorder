@@ -1,3 +1,4 @@
+using AVFoundation;
 using Foundation;
 using Plugin.AudioRecorder;
 using UIKit;
@@ -22,8 +23,31 @@ namespace AudioRecord.Forms.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
-			// this controls whether the library will attempt to force the shared AVAudioSession into recording mode, and then reset it after recording completes
-			AudioRecorderService.ConfigureAVAudioSession = true;
+			// The following are all optional settings to change the behavior on iOS
+
+			// this controls whether the library will attempt to set the shared AVAudioSession category, and then reset it after recording completes
+			AudioRecorderService.RequestAVAudioSessionCategory (AVAudioSessionCategory.PlayAndRecord);
+			// same thing as above, forces the shared AVAudioSession into recording mode, and then reset it after recording completes
+			AudioPlayer.RequestAVAudioSessionCategory (AVAudioSessionCategory.PlayAndRecord);
+
+			// allows you to add additional code to configure/change the shared AVAudioSession before each playback instance
+			//	this can be used to alter the cateogry, audio port, check if the system will allow your app to access the session, etc.
+			//	See https://github.com/NateRickard/Plugin.AudioRecorder/issues/27 for additional info
+			AudioPlayer.OnPrepareAudioSession = audioSession =>
+			{
+				// maybe force audio to route to the speaker?
+				var success = audioSession.OverrideOutputAudioPort (AVAudioSessionPortOverride.Speaker, out NSError error);
+
+				// do something else like test if the audio session can go active?
+
+				//if (success)
+				//{
+				//	audioSession.SetActive (true, out error);
+				//}
+			};
+
+			// can also do something AFTER audio is played with this callback
+			//AudioPlayer.OnResetAudioSession = audioSession => ...
 
 			return base.FinishedLaunching(app, options);
         }
