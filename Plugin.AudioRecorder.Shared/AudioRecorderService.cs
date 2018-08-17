@@ -13,6 +13,7 @@ namespace Plugin.AudioRecorder
 		const string DefaultFileName = "ARS_recording.wav";
 
 		WaveRecorder recorder;
+
 		IAudioStream audioStream;
 
 		bool audioDetected;
@@ -164,27 +165,33 @@ namespace Plugin.AudioRecorder
 			{
 				audioDetected = true;
 				silenceTime = null;
+
+				Debug.WriteLine ("AudioStream_OnBroadcast :: {0} :: level > SilenceThreshold :: bytes: {1}; level: {2}", DateTime.Now, bytes.Length, level);
 			}
 			else //no audio detected
 			{
 				//see if we've detected 'near' silence for more than <audioTimeout>
 				if (StopRecordingOnSilence && silenceTime.HasValue)
 				{
-					if (DateTime.Now.Subtract (silenceTime.Value) > AudioSilenceTimeout)
+					var currentTime = DateTime.Now;
+
+					if (currentTime.Subtract (silenceTime.Value) > AudioSilenceTimeout)
 					{
-						Timeout ("AudioRecorderService.AudioStream_OnBroadcast (): AudioSilenceTimeout exceeded, stopping recording");
+						Timeout ($"AudioStream_OnBroadcast :: {currentTime} :: AudioSilenceTimeout exceeded, stopping recording :: Near-silence detected at: {silenceTime}");
 						return;
 					}
 				}
 				else
 				{
 					silenceTime = DateTime.Now;
+
+					Debug.WriteLine ("AudioStream_OnBroadcast :: {0} :: Near-silence detected :: bytes: {1}; level: {2}", silenceTime, bytes.Length, level);
 				}
 			}
 
 			if (StopRecordingAfterTimeout && DateTime.Now - startTime > TotalAudioTimeout)
 			{
-				Timeout ("AudioRecorderService.AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
+				Timeout ("AudioStream_OnBroadcast(): TotalAudioTimeout exceeded, stopping recording");
 			}
 		}
 
