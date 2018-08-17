@@ -9,10 +9,10 @@ namespace Plugin.AudioRecorder
 	/// </summary>
 	public static class AudioFunctions
 	{
-		static float MAX_8_BITS_SIGNED = byte.MaxValue;
-		static float MAX_8_BITS_UNSIGNED = 0xff;
-		static float MAX_16_BITS_SIGNED = short.MaxValue;
-		static float MAX_16_BITS_UNSIGNED = 0xffff;
+		static readonly float MAX_8_BITS_SIGNED = byte.MaxValue;
+		static readonly float MAX_8_BITS_UNSIGNED = 0xff;
+		static readonly float MAX_16_BITS_SIGNED = short.MaxValue;
+		static readonly float MAX_16_BITS_UNSIGNED = 0xffff;
 
 
 		/// <summary>
@@ -34,16 +34,16 @@ namespace Plugin.AudioRecorder
 
 		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int audioLength = -1)
 		{
+			var blockAlign = (short) (channelCount * (bitsPerSample / 8));
+			var averageBytesPerSecond = sampleRate * blockAlign;
+
 			if (writer.BaseStream.CanSeek)
 			{
 				writer.Seek (0, SeekOrigin.Begin);
 			}
 
 			//chunk ID
-			writer.Write ('R');
-			writer.Write ('I');
-			writer.Write ('F');
-			writer.Write ('F');
+			writer.Write (Encoding.UTF8.GetBytes ("RIFF"));
 
 			if (audioLength > -1)
 			{
@@ -55,31 +55,22 @@ namespace Plugin.AudioRecorder
 			}
 
 			//format
-			writer.Write ('W');
-			writer.Write ('A');
-			writer.Write ('V');
-			writer.Write ('E');
+			writer.Write (Encoding.UTF8.GetBytes ("WAVE"));
 
 			//subchunk 1 ID
-			writer.Write ('f');
-			writer.Write ('m');
-			writer.Write ('t');
-			writer.Write (' ');
+			writer.Write (Encoding.UTF8.GetBytes ("fmt "));
 
 			writer.Write (16); //subchunk 1 (fmt) size
 			writer.Write ((short) 1); //PCM audio format
 
 			writer.Write ((short) channelCount);
 			writer.Write (sampleRate);
-			writer.Write (sampleRate * 2);
-			writer.Write ((short) 2); //block align
+			writer.Write (averageBytesPerSecond);
+			writer.Write (blockAlign);
 			writer.Write ((short) bitsPerSample);
 
 			//subchunk 2 ID
-			writer.Write ('d');
-			writer.Write ('a');
-			writer.Write ('t');
-			writer.Write ('a');
+			writer.Write (Encoding.UTF8.GetBytes ("data"));
 
 			//subchunk 2 (data) size
 			writer.Write (audioLength);
@@ -150,8 +141,6 @@ namespace Plugin.AudioRecorder
 			{
 				if (use16Bit) { level = (float) max / MAX_16_BITS_UNSIGNED; } else { level = (float) max / MAX_8_BITS_UNSIGNED; }
 			}
-
-			//System.Diagnostics.Debug.WriteLine ("LEVEL is {0}", level);
 
 			return level;
 		}
