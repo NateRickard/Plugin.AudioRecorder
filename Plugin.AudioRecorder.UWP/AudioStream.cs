@@ -1,17 +1,19 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Windows.Media;
+using Windows.Media.Audio;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
+using Windows.Media.Render;
 using Windows.Storage.Streams;
 
 namespace Plugin.AudioRecorder
 {
 	public class AudioStream : IAudioStream
 	{
-		readonly uint bufferSize = 1024;
-		MediaCapture capture;
-		InMemoryRandomAccessStream stream;
+		AudioGraph audioGraph;
+		AudioFrameOutputNode outputNode;
 
 		/// <summary>
 		/// Occurs when new audio has been streamed.
@@ -70,25 +72,53 @@ namespace Plugin.AudioRecorder
 
 		async Task Init ()
 		{
-			await Stop ();
-
-			stream = new InMemoryRandomAccessStream ();
-
 			try
 			{
-				var settings = new MediaCaptureInitializationSettings
+				await Stop ();
+
+				var pcmEncoding = AudioEncodingProperties.CreatePcm ((uint) SampleRate, (uint) ChannelCount, (uint) BitsPerSample);
+				// apparently this is not _really_ used/supported here, as the audio data seems to come thru as floats (so basically MediaEncodingSubtypes.Float?)
+				pcmEncoding.Subtype = MediaEncodingSubtypes.Pcm;
+
+				var graphSettings = new AudioGraphSettings (AudioRenderCategory.Media)
 				{
-					StreamingCaptureMode = StreamingCaptureMode.Audio,
-					AudioProcessing = Windows.Media.AudioProcessing.Raw
+					EncodingProperties = pcmEncoding,
+					DesiredRenderDeviceAudioProcessing = AudioProcessing.Raw
 				};
 
-				capture = new MediaCapture ();
-				await capture.InitializeAsync (settings);
+				// create our audio graph... this will be a device input node feeding audio data into a frame output node
+				var graphResult = await AudioGraph.CreateAsync (graphSettings);
 
-				capture.RecordLimitationExceeded += OnRecordLimitationExceeded;
-				capture.Failed += OnCaptureFailed;
+				if (graphResult.Status == AudioGraphCreationStatus.Success)
+				{
+					audioGraph = graphResult.Graph;
+
+					// take input from whatever the default communications device is set to me on windows
+					var inputResult = await audioGraph.CreateDeviceInputNodeAsync (MediaCategory.Communications, pcmEncoding);
+
+					if (inputResult.Status == AudioDeviceNodeCreationStatus.Success)
+					{
+						// create the output node
+						outputNode = audioGraph.CreateFrameOutputNode (pcmEncoding);
+
+						// wire the input to the output
+						inputResult.DeviceInputNode.AddOutgoingConnection (outputNode);
+
+						// Attach to QuantumStarted event in order to receive synchronous updates from audio graph (to capture incoming audio)
+						audioGraph.QuantumStarted += Graph_QuantumStarted;
+						audioGraph.UnrecoverableErrorOccurred += Graph_UnrecoverableErrorOccurred;
+					}
+					else
+					{
+						throw new Exception ($"audioGraph.CreateDeviceInputNodeAsync() returned non-Success status: {inputResult.Status}");
+					}
+				}
+				else
+				{
+					throw new Exception ($"AudioGraph.CreateAsync() returned non-Success status: {graphResult.Status}");
+				}
 			}
-			catch (Exception)
+			catch
 			{
 				throw;
 			}
@@ -106,15 +136,11 @@ namespace Plugin.AudioRecorder
 				{
 					await Init ();
 
-					var profile = MediaEncodingProfile.CreateWav (AudioEncodingQuality.Low);
-					profile.Audio = AudioEncodingProperties.CreatePcm ((uint) SampleRate, (uint) ChannelCount, (uint) BitsPerSample);
-
-					await capture.StartRecordToStreamAsync (profile, stream);
+					// start our constructed audio graph
+					audioGraph.Start ();
 
 					Active = true;
 					OnActiveChanged?.Invoke (this, true);
-
-					_ = Task.Run (() => Record ());
 				}
 			}
 			catch (Exception ex)
@@ -130,102 +156,106 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Stops the audio stream.
 		/// </summary>
-		public async Task Stop ()
+		public Task Stop ()
 		{
-			if (capture != null)
-			{
-				capture.RecordLimitationExceeded -= OnRecordLimitationExceeded;
-				capture.Failed -= OnCaptureFailed;
-			}
-
 			if (Active)
 			{
 				Active = false;
 
-				await capture?.StopRecordAsync ();
-				stream?.Dispose ();
-				capture?.Dispose ();
+				outputNode?.Stop ();
+				audioGraph?.Stop ();
 
 				OnActiveChanged?.Invoke (this, false);
 			}
+
+			outputNode?.Dispose ();
+			outputNode = null;
+
+			if (audioGraph != null)
+			{
+				audioGraph.QuantumStarted -= Graph_QuantumStarted;
+				audioGraph.UnrecoverableErrorOccurred -= Graph_UnrecoverableErrorOccurred;
+				audioGraph.Dispose ();
+				audioGraph = null;
+			}
+
+			return Task.CompletedTask;
 		}
 
 
-		async void OnRecordLimitationExceeded (MediaCapture sender)
+		void Graph_QuantumStarted (AudioGraph sender, object args)
 		{
-			await Stop ();
+			// we'll only broadcast if we're actively monitoring audio packets
+			if (!Active)
+			{
+				return;
+			}
 
-			throw new Exception ("Record Limitation Exceeded");
-		}
-
-
-		async void OnCaptureFailed (MediaCapture sender, MediaCaptureFailedEventArgs errorEventArgs)
-		{
-			await Stop ();
-
-			throw new Exception ($"OnCaptureFailed error; Code.Message: {errorEventArgs.Code}. {errorEventArgs.Message}");
-		}
-
-
-		/// <summary>
-		/// Record from the microphone and broadcast the buffer.
-		/// </summary>
-		async Task Record ()
-		{
 			try
 			{
-				int readFailureCount = 0;
+				// get an audio frame from the output node
+				AudioFrame frame = outputNode.GetFrame ();
 
-				using (var readStream = stream.CloneStream ())
-				using (var reader = new DataReader (readStream))
+				if (frame.Duration?.Milliseconds == 0) // discard any empty frames
 				{
-					reader.InputStreamOptions = InputStreamOptions.Partial;
-					//reader.UnicodeEncoding = UnicodeEncoding.Utf8;
+					return;
+				}
 
-					while (Active)
+				using (AudioBuffer audioBuffer = frame.LockBuffer (AudioBufferAccessMode.Read))
+				{
+					var buffer = Windows.Storage.Streams.Buffer.CreateCopyFromMemoryBuffer (audioBuffer);
+					buffer.Length = audioBuffer.Length;
+					var audioBytes = new byte [buffer.Length / 2]; // 1/2 length because we're transforming float audio to Int 16
+
+					using (var dataReader = DataReader.FromBuffer (buffer))
 					{
-						try
+						dataReader.ByteOrder = ByteOrder.LittleEndian;
+
+						int pos = 0;
+
+						while (dataReader.UnconsumedBufferLength > 0)
 						{
-							//not sure if this is even a good idea (likely no), but we'll try to allow a single bad read, and past that shut it down
-							if (readFailureCount > 1)
-							{
-								Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
-								await Stop ();
-								break;
-							}
-
-							var loadResult = await reader.LoadAsync (bufferSize);
-
-							//readResult should contain the # bytes read
-							if (loadResult > 0)
-							{
-								byte [] bytes = new byte [loadResult];
-								reader.ReadBytes (bytes);
-
-								//Debug.WriteLine("AudioStream.Record(): Read {0} bytes, broadcasting {1} bytes", loadResult, bytes.Length);
-
-								OnBroadcast?.Invoke (this, bytes);
-							}
-							else
-							{
-								//Debug.WriteLine("AudioStream.Record(): Non positive readResult returned: {0}", loadResult);
-							}
-						}
-						catch (Exception ex)
-						{
-							readFailureCount++;
-
-							Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
-							OnException?.Invoke (this, ex);
+							// need to convert float audio to short and then get its bytes
+							var floatVal = dataReader.ReadSingle ();
+							var shortVal = FloatToInt16 (floatVal);
+							byte [] chunkBytes = BitConverter.GetBytes (shortVal);
+							
+							audioBytes [pos++] = chunkBytes [0];
+							audioBytes [pos++] = chunkBytes [1];
 						}
 					}
+
+					// broadcast the audio data to any listeners
+					OnBroadcast?.Invoke (this, audioBytes);
 				}
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine ("Error in Android AudioStream.Record(): {0}", ex.Message);
-				OnException?.Invoke (this, ex);
+				OnException?.Invoke (this, new Exception ($"AudioStream.QueueInputCompleted() :: Error: {ex.Message}"));
 			}
+		}
+
+
+		/// <summary>
+		/// The bytes that we get from audiograph is in IEEE float, we need to covert that to 16 bit
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		static Int16 FloatToInt16 (float value)
+		{
+			float f = value * Int16.MaxValue;
+			if (f > Int16.MaxValue) f = Int16.MaxValue;
+			if (f < Int16.MinValue) f = Int16.MinValue;
+
+			return (Int16) f;
+		}
+
+
+		async void Graph_UnrecoverableErrorOccurred (AudioGraph sender, AudioGraphUnrecoverableErrorOccurredEventArgs args)
+		{
+			await Stop ();
+
+			throw new Exception ($"UnrecoverableErrorOccurred error: {args.Error}");
 		}
 	}
 }
