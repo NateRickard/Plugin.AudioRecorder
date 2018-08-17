@@ -86,7 +86,7 @@ namespace Plugin.AudioRecorder
 
 			if (audioSource.State == State.Uninitialized)
 			{
-				throw new Exception ("Unable to successfully initialize AudioRecord; reporting State.Uninitialized.  If using an emulator, make sure it has access to the system microphone.");
+				throw new Exception ("Unable to successfully initialize AudioStream; reporting State.Uninitialized.  If using an emulator, make sure it has access to the system microphone.");
 			}
 		}
 

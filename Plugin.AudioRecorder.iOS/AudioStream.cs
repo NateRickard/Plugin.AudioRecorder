@@ -179,22 +179,22 @@ namespace Plugin.AudioRecorder
 					return;
 				}
 
-				//copy data from the audio queue to a byte buffer
+				// copy data from the audio queue to a byte buffer
 				var buffer = (AudioQueueBuffer) System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
 				var audioBytes = new byte [buffer.AudioDataByteSize];
 				System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, audioBytes, 0, (int) buffer.AudioDataByteSize);
 
-				//broadcast the audio data to any listeners
+				// broadcast the audio data to any listeners
 				OnBroadcast?.Invoke (this, audioBytes);
 
-				//check if active again, because the auto stop logic may stop the audio queue from within this handler!
+				// check if active again, because the auto stop logic may stop the audio queue from within this handler!
 				if (Active)
 				{
 					var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
 
 					if (status != AudioQueueStatus.Ok)
 					{
-						System.Diagnostics.Debug.WriteLine ("AudioStream.QueueInputCompleted() :: audioQueue.EnqueueBuffer returned non-Ok status :: {0}", status);
+						Debug.WriteLine ("AudioStream.QueueInputCompleted() :: audioQueue.EnqueueBuffer returned non-Ok status :: {0}", status);
 						OnException?.Invoke (this, new Exception ($"audioQueue.EnqueueBuffer returned non-Ok status :: {status}"));
 					}
 				}
