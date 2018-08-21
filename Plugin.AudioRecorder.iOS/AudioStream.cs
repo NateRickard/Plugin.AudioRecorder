@@ -1,14 +1,16 @@
 using AudioToolbox;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
 {
 	internal class AudioStream : IAudioStream
 	{
-		const int DefaultBufferSize = 640;
-		readonly int bufferSize;
+		const int CountAudioBuffers = 3;
+		const int MaxBufferSize = 0x50000;
+		const float TargetMeasurementTime = 100F; // milliseconds
 
 		InputAudioQueue audioQueue;
 
@@ -105,19 +107,22 @@ namespace Plugin.AudioRecorder
 			{
 				audioQueue.InputCompleted -= QueueInputCompleted;
 
-				var result = audioQueue.Stop (true);
+				if (audioQueue.IsRunning)
+				{
+					var result = audioQueue.Stop (true);
+
+					if (result == AudioQueueStatus.Ok)
+					{
+						OnActiveChanged?.Invoke (this, false);
+					}
+					else
+					{
+						Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
+					}
+				}
 
 				audioQueue.Dispose ();
 				audioQueue = null;
-
-				if (result == AudioQueueStatus.Ok)
-				{
-					OnActiveChanged?.Invoke (this, false);
-				}
-				else
-				{
-					Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
-				}
 			}
 
 			return Task.FromResult (true);
@@ -128,38 +133,54 @@ namespace Plugin.AudioRecorder
 		/// Initializes a new instance of the <see cref="AudioStream"/> class.
 		/// </summary>
 		/// <param name="sampleRate">Sample rate.</param>
-		/// <param name="bufferSize">The buffer size used to read from the stream.  This can typically be left to the default.</param>
-		public AudioStream (int sampleRate, int bufferSize = DefaultBufferSize)
+		public AudioStream (int sampleRate)
 		{
 			SampleRate = sampleRate;
-			this.bufferSize = bufferSize;
+		}
+
+
+		void BufferOperation (Func<AudioQueueStatus> bufferFn, Action successAction = null, Action<AudioQueueStatus> failAction = null)
+		{
+			var status = bufferFn ();
+
+			if (status == AudioQueueStatus.Ok)
+			{
+				successAction?.Invoke ();
+			}
+			else
+			{
+				if (failAction != null)
+				{
+					failAction (status);
+				}
+				else
+				{
+					throw new Exception ($"AudioStream buffer error :: buffer enqueue or allocation returned non - Ok status:: {status}");
+				}
+			}
 		}
 
 
 		void InitAudioQueue ()
 		{
-			var audioFormat = new AudioStreamBasicDescription
-			{
-				SampleRate = SampleRate,
-				Format = AudioFormatType.LinearPCM,
-				FormatFlags = AudioFormatFlags.LinearPCMIsSignedInteger | AudioFormatFlags.LinearPCMIsPacked,
-				FramesPerPacket = 1,
-				ChannelsPerFrame = 1,
-				BitsPerChannel = BitsPerSample,
-				BytesPerPacket = 2,
-				BytesPerFrame = 2,
-				Reserved = 0
-			};
+			// create our audio queue & configure buffers
+			var audioFormat = AudioStreamBasicDescription.CreateLinearPCM (SampleRate, (uint) ChannelCount, (uint) BitsPerSample);
 
 			audioQueue = new InputAudioQueue (audioFormat);
 			audioQueue.InputCompleted += QueueInputCompleted;
 
-			var bufferByteSize = bufferSize * audioFormat.BytesPerPacket;
+			// calculate our buffer size and make sure it's not too big
+			var bufferByteSize = (int) (TargetMeasurementTime / 1000F/*ms to sec*/ * SampleRate * audioFormat.BytesPerPacket);
+			bufferByteSize = bufferByteSize < MaxBufferSize ? bufferByteSize : MaxBufferSize;
 
-			for (var index = 0; index < 3; index++)
+			for (var index = 0; index < CountAudioBuffers; index++)
 			{
-				audioQueue.AllocateBufferWithPacketDescriptors (bufferByteSize, bufferSize, out IntPtr bufferPtr);
-				audioQueue.EnqueueBuffer (bufferPtr, bufferByteSize, null);
+				var bufferPtr = IntPtr.Zero;
+
+				BufferOperation (() => audioQueue.AllocateBuffer (bufferByteSize, out bufferPtr), () =>
+				 {
+					 BufferOperation (() => audioQueue.EnqueueBuffer (bufferPtr, bufferByteSize, null), () => Debug.WriteLine ("AudioQueue buffer enqueued :: {0} of {1}", index + 1, CountAudioBuffers));
+				 });
 			}
 		}
 
@@ -179,23 +200,22 @@ namespace Plugin.AudioRecorder
 					return;
 				}
 
-				// copy data from the audio queue to a byte buffer
-				var buffer = (AudioQueueBuffer) System.Runtime.InteropServices.Marshal.PtrToStructure (e.IntPtrBuffer, typeof (AudioQueueBuffer));
-				var audioBytes = new byte [buffer.AudioDataByteSize];
-				System.Runtime.InteropServices.Marshal.Copy (buffer.AudioData, audioBytes, 0, (int) buffer.AudioDataByteSize);
-
-				// broadcast the audio data to any listeners
-				OnBroadcast?.Invoke (this, audioBytes);
-
-				// check if active again, because the auto stop logic may stop the audio queue from within this handler!
-				if (Active)
+				if (e.Buffer.AudioDataByteSize > 0)
 				{
-					var status = audioQueue.EnqueueBuffer (e.IntPtrBuffer, bufferSize, e.PacketDescriptions);
+					var audioBytes = new byte [e.Buffer.AudioDataByteSize];
+					Marshal.Copy (e.Buffer.AudioData, audioBytes, 0, (int) e.Buffer.AudioDataByteSize);
 
-					if (status != AudioQueueStatus.Ok)
+					// broadcast the audio data to any listeners
+					OnBroadcast?.Invoke (this, audioBytes);
+
+					// check if active again, because the auto stop logic may stop the audio queue from within this handler!
+					if (Active)
 					{
-						Debug.WriteLine ("AudioStream.QueueInputCompleted() :: audioQueue.EnqueueBuffer returned non-Ok status :: {0}", status);
-						OnException?.Invoke (this, new Exception ($"audioQueue.EnqueueBuffer returned non-Ok status :: {status}"));
+						BufferOperation (() => audioQueue.EnqueueBuffer (e.IntPtrBuffer, null), null, status =>
+						 {
+							 Debug.WriteLine ("AudioStream.QueueInputCompleted() :: audioQueue.EnqueueBuffer returned non-Ok status :: {0}", status);
+							 OnException?.Invoke (this, new Exception ($"audioQueue.EnqueueBuffer returned non-Ok status :: {status}"));
+						 });
 					}
 				}
 			}
