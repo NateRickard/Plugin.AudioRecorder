@@ -11,6 +11,7 @@ namespace Plugin.AudioRecorder
 	public partial class AudioRecorderService
 	{
 		const string DefaultFileName = "ARS_recording.wav";
+		const float NearZero = .00000000001F;
 
 		WaveRecorder recorder;
 
@@ -160,6 +161,12 @@ namespace Plugin.AudioRecorder
 		void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
 			var level = AudioFunctions.CalculateLevel (bytes);
+
+			if (level < NearZero && !audioDetected) // discard any initial 0s so we don't jump the gun on timing out
+			{
+				Debug.WriteLine ("level == {0} && !audioDetected", level);
+				return;
+			}
 
 			if (level > SilenceThreshold) //did we find a signal?
 			{
