@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Media;
 using Windows.Media.Audio;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Windows.Media.Render;
-using Windows.Storage.Streams;
 
 namespace Plugin.AudioRecorder
 {
@@ -51,12 +52,10 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		public int BitsPerSample { get; private set; } = 16;
 
-
 		/// <summary>
 		/// Gets a value indicating if the audio stream is active.
 		/// </summary>
 		public bool Active { get; private set; }
-
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AudioStream"/> class.
@@ -68,7 +67,6 @@ namespace Plugin.AudioRecorder
 			SampleRate = sampleRate;
 			ChannelCount = channels;
 		}
-
 
 		async Task Init ()
 		{
@@ -84,6 +82,10 @@ namespace Plugin.AudioRecorder
 				{
 					EncodingProperties = pcmEncoding,
 					DesiredRenderDeviceAudioProcessing = AudioProcessing.Raw
+					// these do not seem to take effect on certain hardware and MSFT recommends SystemDefault when recording to a file anyway
+					//	We'll buffer audio data ourselves to improve RMS calculation across larger samples
+					//QuantumSizeSelectionMode = QuantumSizeSelectionMode.ClosestToDesired,
+					//DesiredSamplesPerQuantum = 4096
 				};
 
 				// create our audio graph... this will be a device input node feeding audio data into a frame output node
@@ -124,7 +126,6 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
 		/// <summary>
 		/// Starts the audio stream.
 		/// </summary>
@@ -151,7 +152,6 @@ namespace Plugin.AudioRecorder
 				throw;
 			}
 		}
-
 
 		/// <summary>
 		/// Stops the audio stream.
@@ -182,8 +182,22 @@ namespace Plugin.AudioRecorder
 			return Task.CompletedTask;
 		}
 
+		/// <summary>
+		/// IMemoryBuferByteAccess is used to access the underlying audioframe for read and write
+		/// </summary>
+		[ComImport]
+		[Guid ("5B0D3235-4DBA-4D44-865E-8F1D0E4FD04D")]
+		[InterfaceType (ComInterfaceType.InterfaceIsIUnknown)]
+		unsafe interface IMemoryBufferByteAccess
+		{
+			void GetBuffer (out byte* buffer, out uint capacity);
+		}
 
-		void Graph_QuantumStarted (AudioGraph sender, object args)
+		const int broadcastSize = 10; // we'll accumulate 10 'quantums' before broadcasting them
+		int bufferPosition = 0;
+		byte [] audioBytes;
+
+		unsafe void Graph_QuantumStarted (AudioGraph sender, object args)
 		{
 			// we'll only broadcast if we're actively monitoring audio packets
 			if (!Active)
@@ -201,32 +215,41 @@ namespace Plugin.AudioRecorder
 					return;
 				}
 
-				using (AudioBuffer audioBuffer = frame.LockBuffer (AudioBufferAccessMode.Read))
+				using (var buffer = frame.LockBuffer (AudioBufferAccessMode.Read))
+				using (IMemoryBufferReference reference = buffer.CreateReference ())
 				{
-					var buffer = Windows.Storage.Streams.Buffer.CreateCopyFromMemoryBuffer (audioBuffer);
-					buffer.Length = audioBuffer.Length;
-					var audioBytes = new byte [buffer.Length / 2]; // 1/2 length because we're transforming float audio to Int 16
+					// Get the buffer from the AudioFrame
+					((IMemoryBufferByteAccess) reference).GetBuffer (out byte* dataInBytes, out uint capacityInBytes);
 
-					using (var dataReader = DataReader.FromBuffer (buffer))
+					// convert the bytes into float
+					float* dataInFloat = (float*) dataInBytes;
+
+					if (audioBytes == null)
 					{
-						dataReader.ByteOrder = ByteOrder.LittleEndian;
-
-						int pos = 0;
-
-						while (dataReader.UnconsumedBufferLength > 0)
-						{
-							// need to convert float audio to short and then get its bytes
-							var floatVal = dataReader.ReadSingle ();
-							var shortVal = FloatToInt16 (floatVal);
-							byte [] chunkBytes = BitConverter.GetBytes (shortVal);
-							
-							audioBytes [pos++] = chunkBytes [0];
-							audioBytes [pos++] = chunkBytes [1];
-						}
+						audioBytes = new byte [buffer.Length * broadcastSize / 2]; // buffer length * # of frames we want to accrue / 2 (because we're transforming float audio to Int 16)
 					}
 
-					// broadcast the audio data to any listeners
-					OnBroadcast?.Invoke (this, audioBytes);
+					for (int i = 0; i < capacityInBytes / sizeof (float); i++)
+					{
+						// convert the float into a double byte for 16 bit PCM
+						var shortVal = AudioFunctions.FloatToInt16 (dataInFloat [i]);
+						byte [] chunkBytes = BitConverter.GetBytes (shortVal);
+
+						audioBytes [bufferPosition++] = chunkBytes [0];
+						audioBytes [bufferPosition++] = chunkBytes [1];
+					}
+
+					// we want to wait until we accrue <broadcastSize> # of frames and then broadcast them
+					//	in practice, this will take us from 20ms chunks to 100ms chunks and result in more accurate audio level calculations
+					//	we could maybe use the audiograph latency settings to achieve similar results but this seems to work well
+					if (bufferPosition == audioBytes.Length || !Active)
+					{
+						// broadcast the audio data to any listeners
+						OnBroadcast?.Invoke (this, audioBytes);
+
+						audioBytes = null;
+						bufferPosition = 0;
+					}
 				}
 			}
 			catch (Exception ex)
@@ -235,27 +258,30 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
-		/// <summary>
-		/// The bytes that we get from audiograph is in IEEE float, we need to covert that to 16 bit
-		/// </summary>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		static Int16 FloatToInt16 (float value)
-		{
-			float f = value * Int16.MaxValue;
-			if (f > Int16.MaxValue) f = Int16.MaxValue;
-			if (f < Int16.MinValue) f = Int16.MinValue;
-
-			return (Int16) f;
-		}
-
-
 		async void Graph_UnrecoverableErrorOccurred (AudioGraph sender, AudioGraphUnrecoverableErrorOccurredEventArgs args)
 		{
 			await Stop ();
 
 			throw new Exception ($"UnrecoverableErrorOccurred error: {args.Error}");
+		}
+
+		/// <summary>
+		/// Flushes any audio bytes in memory but not yet broadcast out to any listeners.
+		/// </summary>
+		public void Flush ()
+		{
+			// not sure this is _really_ needed, but just in case, if we have bytes buffered in audioBytes, flush them out here
+
+			// do we have leftover bytes to broadcast as we're stopping?
+			if (audioBytes != null)
+			{
+				Debug.WriteLine ("Broadcasting remaining {0} audioBytes", audioBytes.Length);
+
+				// broadcast the audio data to any listeners
+				OnBroadcast?.Invoke (this, audioBytes);
+
+				audioBytes = null;
+			}
 		}
 	}
 }
