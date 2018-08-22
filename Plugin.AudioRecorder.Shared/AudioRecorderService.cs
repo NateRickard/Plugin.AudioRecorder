@@ -22,13 +22,11 @@ namespace Plugin.AudioRecorder
 		DateTime? startTime;
 		TaskCompletionSource<string> recordTask;
 
-
 		/// <summary>
 		/// Gets the details of the underlying audio stream.
 		/// </summary>
 		/// <remarks>Accessible once <see cref="StartRecording"/> has been called.</remarks>
 		public AudioStreamDetails AudioStreamDetails { get; private set; }
-
 
 		/// <summary>
 		/// Gets/sets the desired file path. If null it will be set automatically
@@ -36,19 +34,16 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		public string FilePath { get; set; }
 
-
 		/// <summary>
 		/// Gets/sets the preferred sample rate to be used during recording.
 		/// </summary>
 		/// <remarks>This value may be overridden by platform-specific implementations, e.g. the Android AudioManager will be asked for its preferred sample rate and may override any user-set value here.</remarks>
 		public int PreferredSampleRate { get; set; } = 44100;
 
-
 		/// <summary>
 		/// Returns a value indicating if the <see cref="AudioRecorderService"/> is currently recording audio
 		/// </summary>
 		public bool IsRecording => audioStream?.Active ?? false;
-
 
 		/// <summary>
 		/// If <see cref="StopRecordingOnSilence"/> is set to <c>true</c>, this <see cref="TimeSpan"/> indicates the amount of 'silent' time is required before recording is stopped.
@@ -56,20 +51,17 @@ namespace Plugin.AudioRecorder
 		/// <remarks>Defaults to 2 seconds.</remarks>
 		public TimeSpan AudioSilenceTimeout { get; set; } = TimeSpan.FromSeconds (2);
 
-
 		/// <summary>
 		/// If <see cref="StopRecordingAfterTimeout"/> is set to <c>true</c>, this <see cref="TimeSpan"/> indicates the total amount of time to record audio for before recording is stopped. Defaults to 30 seconds.
 		/// </summary>
 		/// <seealso cref="StopRecordingAfterTimeout"/>
 		public TimeSpan TotalAudioTimeout { get; set; } = TimeSpan.FromSeconds (30);
 
-
 		/// <summary>
 		/// Gets/sets a value indicating if the <see cref="AudioRecorderService"/> should stop recording after silence (low audio signal) is detected.
 		/// </summary>
 		/// <remarks>Default is `true`</remarks>
 		public bool StopRecordingOnSilence { get; set; } = true;
-
 
 		/// <summary>
 		/// Gets/sets a value indicating if the <see cref="AudioRecorderService"/> should stop recording after a certain amount of time.
@@ -78,13 +70,11 @@ namespace Plugin.AudioRecorder
 		/// <seealso cref="TotalAudioTimeout"/>
 		public bool StopRecordingAfterTimeout { get; set; } = true;
 
-
 		/// <summary>
 		/// Gets/sets a value indicating the signal threshold that determines silence.  If the recorder is being over or under aggressive when detecting silence, you can alter this value to achieve different results.
 		/// </summary>
-		/// <remarks>Defaults to .2.  Value should be between 0 and 1.</remarks>
-		public float SilenceThreshold { get; set; } = .2f;
-
+		/// <remarks>Defaults to .15.  Value should be between 0 and 1.</remarks>
+		public float SilenceThreshold { get; set; } = .15f;
 
 		/// <summary>
 		/// This event is raised when audio recording is complete and delivers a full filepath to the recorded audio file.
@@ -92,9 +82,7 @@ namespace Plugin.AudioRecorder
 		/// <remarks>This event will be raised on a background thread to allow for any further processing needed.  The audio file will be <c>null</c> in the case that no audio was recorded.</remarks>
 		public event EventHandler<string> AudioInputReceived;
 
-
 		partial void Init ();
-
 
 		/// <summary>
 		/// Creates a new instance of the <see cref="AudioRecorderService"/>.
@@ -103,7 +91,6 @@ namespace Plugin.AudioRecorder
 		{
 			Init ();
 		}
-
 
 		/// <summary>
 		/// Starts recording audio.
@@ -139,7 +126,6 @@ namespace Plugin.AudioRecorder
 			return recordTask.Task;
 		}
 
-
 		/// <summary>
 		/// Gets a new <see cref="Stream"/> to the recording audio file in readonly mode.
 		/// </summary>
@@ -149,14 +135,12 @@ namespace Plugin.AudioRecorder
 			return recorder.GetAudioFileStream ();
 		}
 
-
 		void ResetAudioDetection ()
 		{
 			audioDetected = false;
 			silenceTime = null;
 			startTime = null;
 		}
-
 
 		void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
@@ -168,21 +152,21 @@ namespace Plugin.AudioRecorder
 				return;
 			}
 
-			if (level > SilenceThreshold) //did we find a signal?
+			if (level > SilenceThreshold) // did we find a signal?
 			{
 				audioDetected = true;
 				silenceTime = null;
 
 				Debug.WriteLine ("AudioStream_OnBroadcast :: {0} :: level > SilenceThreshold :: bytes: {1}; level: {2}", DateTime.Now, bytes.Length, level);
 			}
-			else //no audio detected
+			else // no audio detected
 			{
-				//see if we've detected 'near' silence for more than <audioTimeout>
+				// see if we've detected 'near' silence for more than <audioTimeout>
 				if (StopRecordingOnSilence && silenceTime.HasValue)
 				{
 					var currentTime = DateTime.Now;
 
-					if (currentTime.Subtract (silenceTime.Value) > AudioSilenceTimeout)
+					if (currentTime.Subtract (silenceTime.Value).TotalMilliseconds > AudioSilenceTimeout.TotalMilliseconds)
 					{
 						Timeout ($"AudioStream_OnBroadcast :: {currentTime} :: AudioSilenceTimeout exceeded, stopping recording :: Near-silence detected at: {silenceTime}");
 						return;
@@ -202,17 +186,15 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
 		void Timeout (string reason)
 		{
 			Debug.WriteLine (reason);
-			audioStream.OnBroadcast -= AudioStream_OnBroadcast; //need this to be immediate or we can try to stop more than once
+			audioStream.OnBroadcast -= AudioStream_OnBroadcast; // need this to be immediate or we can try to stop more than once
 			
-			//since we're in the middle of handling a broadcast event when an audio timeout occurs, we need to break the StopRecording call on another thread
+			// since we're in the middle of handling a broadcast event when an audio timeout occurs, we need to break the StopRecording call on another thread
 			//	Otherwise, Bad. Things. Happen.
 			_ = Task.Run (() => StopRecording ());
 		}
-
 
 		/// <summary>
 		/// Stops recording audio.
@@ -221,12 +203,13 @@ namespace Plugin.AudioRecorder
 		/// Use <c>false</c> here to stop recording but do nothing further (from an error state, etc.).</param>
 		public async Task StopRecording (bool continueProcessing = true)
 		{
+			audioStream.Flush (); // allow the stream to send any remaining data
 			audioStream.OnBroadcast -= AudioStream_OnBroadcast;
 
 			try
 			{
 				await audioStream.Stop ();
-				//WaveRecorder will be stopped as result of stream stopping
+				// WaveRecorder will be stopped as result of stream stopping
 			}
 			catch (Exception ex)
 			{
@@ -236,7 +219,7 @@ namespace Plugin.AudioRecorder
 			OnRecordingStopped ();
 
 			var returnedFilePath = GetAudioFilePath ();
-			//complete the recording Task for anthing waiting on this
+			// complete the recording Task for anthing waiting on this
 			recordTask.TrySetResult (returnedFilePath);
 
 			if (continueProcessing)
@@ -246,7 +229,6 @@ namespace Plugin.AudioRecorder
 				AudioInputReceived?.Invoke (this, returnedFilePath);
 			}
 		}
-
 
 		void InitializeStream (int sampleRate)
 		{
@@ -273,7 +255,6 @@ namespace Plugin.AudioRecorder
 				Debug.WriteLine ("Error: {0}", ex);
 			}
 		}
-
 
 		/// <summary>
 		/// Gets the full filepath to the recorded audio file.
