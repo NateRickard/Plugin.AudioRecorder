@@ -14,7 +14,6 @@ namespace Plugin.AudioRecorder
 		static readonly float MAX_16_BITS_SIGNED = short.MaxValue;
 		static readonly float MAX_16_BITS_UNSIGNED = 0xffff;
 
-
 		/// <summary>
 		/// Writes a WAV file header using the specified details.
 		/// </summary>
@@ -30,7 +29,6 @@ namespace Plugin.AudioRecorder
 				WriteWavHeader (writer, channelCount, sampleRate, bitsPerSample, audioLength);
 			}
 		}
-
 
 		internal static void WriteWavHeader (BinaryWriter writer, int channelCount, int sampleRate, int bitsPerSample, int audioLength = -1)
 		{
@@ -75,7 +73,6 @@ namespace Plugin.AudioRecorder
 			//subchunk 2 (data) size
 			writer.Write (audioLength);
 		}
-
 
 		// Adapted from http://stackoverflow.com/questions/5800649/detect-silence-when-recording
 		internal static float CalculateLevel (byte [] buffer, int readPoint = 0, int leftOver = 0, bool use16Bit = true, bool signed = true, bool bigEndian = false)
@@ -143,6 +140,20 @@ namespace Plugin.AudioRecorder
 			}
 
 			return level;
+		}
+
+		/// <summary>
+		/// The bytes that we get from audiograph is in IEEE float, we need to covert that to 16 bit
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		internal static short FloatToInt16 (float value)
+		{
+			float f = value * short.MaxValue;
+			if (f > short.MaxValue) f = short.MaxValue;
+			if (f < short.MinValue) f = short.MinValue;
+
+			return (short) f;
 		}
 	}
 }
