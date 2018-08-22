@@ -15,7 +15,6 @@ namespace Plugin.AudioRecorder
 		int byteCount;
 		IAudioStream audioStream;
 
-
 		/// <summary>
 		/// Starts recording WAVE format audio from the audio stream.
 		/// </summary>
@@ -61,7 +60,6 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
 		/// <summary>
 		/// Gets a new <see cref="Stream"/> to the audio file in readonly mode.
 		/// </summary>
@@ -72,7 +70,6 @@ namespace Plugin.AudioRecorder
 			return new FileStream (audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
-
 		void StreamActiveChanged (object sender, bool active)
 		{
 			if (!active)
@@ -80,7 +77,6 @@ namespace Plugin.AudioRecorder
 				StopRecorder ();
 			}
 		}
-
 
 		void OnStreamBroadcast (object sender, byte [] bytes)
 		{
@@ -99,7 +95,6 @@ namespace Plugin.AudioRecorder
 				StopRecorder ();
 			}
 		}
-
 
 		/// <summary>
 		/// Stops recording WAV audio from the underlying <see cref="IAudioStream"/> and finishes writing the WAV file.
@@ -137,7 +132,6 @@ namespace Plugin.AudioRecorder
 				throw;
 			}
 		}
-
 
 		public void Dispose ()
 		{
