@@ -9,7 +9,7 @@ namespace Plugin.AudioRecorder
 	internal class AudioStream : IAudioStream
 	{
 		const int CountAudioBuffers = 3;
-		const int MaxBufferSize = 0x50000;
+		const int MaxBufferSize = 0x50000; // 320 KB
 		const float TargetMeasurementTime = 100F; // milliseconds
 
 		InputAudioQueue audioQueue;
@@ -41,7 +41,6 @@ namespace Plugin.AudioRecorder
 			private set;
 		}
 
-
 		/// <summary>
 		/// Gets the channel count.  Currently always 1 (Mono).
 		/// </summary>
@@ -50,95 +49,22 @@ namespace Plugin.AudioRecorder
 		/// </value>
 		public int ChannelCount => 1;
 
-
 		/// <summary>
 		/// Gets bits per sample.  Currently always 16 (bits).
 		/// </summary>
 		public int BitsPerSample => 16;
-
 
 		/// <summary>
 		/// Gets a value indicating if the audio stream is active.
 		/// </summary>
 		public bool Active => audioQueue?.IsRunning ?? false;
 
-
 		/// <summary>
-		/// Starts the audio stream.
+		/// Wrapper function to run success/failure callbacks from an operation that returns an AudioQueueStatus.
 		/// </summary>
-		public Task Start ()
-		{
-			try
-			{
-				if (!Active)
-				{
-					InitAudioQueue ();
-
-					var result = audioQueue.Start ();
-
-					if (result == AudioQueueStatus.Ok)
-					{
-						OnActiveChanged?.Invoke (this, true);
-					}
-					else
-					{
-						throw new Exception ($"audioQueue.Start() returned non-OK status: {result}");
-					}
-				}
-
-				return Task.FromResult (true);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex.Message);
-
-				Stop ();
-				throw;
-			}
-		}
-
-
-		/// <summary>
-		/// Stops the audio stream.
-		/// </summary>
-		public Task Stop ()
-		{
-			if (audioQueue != null)
-			{
-				audioQueue.InputCompleted -= QueueInputCompleted;
-
-				if (audioQueue.IsRunning)
-				{
-					var result = audioQueue.Stop (true);
-
-					if (result == AudioQueueStatus.Ok)
-					{
-						OnActiveChanged?.Invoke (this, false);
-					}
-					else
-					{
-						Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", result);
-					}
-				}
-
-				audioQueue.Dispose ();
-				audioQueue = null;
-			}
-
-			return Task.FromResult (true);
-		}
-
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AudioStream"/> class.
-		/// </summary>
-		/// <param name="sampleRate">Sample rate.</param>
-		public AudioStream (int sampleRate)
-		{
-			SampleRate = sampleRate;
-		}
-
-
+		/// <param name="bufferFn">The function that returns AudioQueueStatus.</param>
+		/// <param name="successAction">The Action to run if the result is AudioQueueStatus.Ok.</param>
+		/// <param name="failAction">The Action to run if the result is anything other than AudioQueueStatus.Ok.</param>
 		void BufferOperation (Func<AudioQueueStatus> bufferFn, Action successAction = null, Action<AudioQueueStatus> failAction = null)
 		{
 			var status = bufferFn ();
@@ -155,11 +81,69 @@ namespace Plugin.AudioRecorder
 				}
 				else
 				{
-					throw new Exception ($"AudioStream buffer error :: buffer enqueue or allocation returned non - Ok status:: {status}");
+					throw new Exception ($"AudioStream buffer error :: buffer operation returned non - Ok status:: {status}");
 				}
 			}
 		}
 
+		/// <summary>
+		/// Starts the audio stream.
+		/// </summary>
+		public Task Start ()
+		{
+			try
+			{
+				if (!Active)
+				{
+					InitAudioQueue ();
+
+					BufferOperation (() => audioQueue.Start (),
+						() => OnActiveChanged?.Invoke (this, true),
+						status => throw new Exception ($"audioQueue.Start() returned non-OK status: {status}"));
+				}
+
+				return Task.FromResult (true);
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine ("Error in AudioStream.Start(): {0}", ex.Message);
+
+				Stop ();
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Stops the audio stream.
+		/// </summary>
+		public Task Stop ()
+		{
+			if (audioQueue != null)
+			{
+				audioQueue.InputCompleted -= QueueInputCompleted;
+
+				if (audioQueue.IsRunning)
+				{
+					BufferOperation (() => audioQueue.Stop (true),
+						() => OnActiveChanged?.Invoke (this, false),
+						status => Debug.WriteLine ("AudioStream.Stop() :: audioQueue.Stop returned non OK result: {0}", status));
+				}
+
+				audioQueue.Dispose ();
+				audioQueue = null;
+			}
+
+			return Task.FromResult (true);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AudioStream"/> class.
+		/// </summary>
+		/// <param name="sampleRate">Sample rate.</param>
+		public AudioStream (int sampleRate)
+		{
+			SampleRate = sampleRate;
+		}
 
 		void InitAudioQueue ()
 		{
@@ -183,7 +167,6 @@ namespace Plugin.AudioRecorder
 				 });
 			}
 		}
-
 
 		/// <summary>
 		/// Handles iOS audio buffer queue completed message.
@@ -225,6 +208,14 @@ namespace Plugin.AudioRecorder
 
 				OnException?.Invoke (this, new Exception ($"AudioStream.QueueInputCompleted() :: Error: {ex.Message}"));
 			}
+		}
+
+		/// <summary>
+		/// Flushes any audio bytes in memory but not yet broadcast out to any listeners.
+		/// </summary>
+		public void Flush ()
+		{
+			// not needed for this implementation
 		}
 	}
 }
