@@ -55,5 +55,10 @@ namespace Plugin.AudioRecorder
 		/// Stops the audio stream.
 		/// </summary>
 		Task Stop ();
+
+		/// <summary>
+		/// Flushes any audio bytes in memory but not yet broadcast out to any listeners.
+		/// </summary>
+		void Flush ();
 	}
 }

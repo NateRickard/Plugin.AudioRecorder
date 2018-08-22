@@ -44,12 +44,10 @@ namespace Plugin.AudioRecorder
 		/// </value>
 		public int SampleRate { get; private set; } = 44100;
 
-
 		/// <summary>
 		/// Gets bits per sample.
 		/// </summary>
 		public int BitsPerSample => (audioSource.AudioFormat == Encoding.Pcm16bit) ? 16 : 8;
-
 
 		/// <summary>
 		/// Gets the channel count.
@@ -59,23 +57,20 @@ namespace Plugin.AudioRecorder
 		/// </value>        
 		public int ChannelCount => audioSource.ChannelCount;
 
-
 		/// <summary>
 		/// Gets the average data transfer rate
 		/// </summary>
 		/// <value>The average data transfer rate in bytes per second.</value>
 		public int AverageBytesPerSecond => SampleRate * BitsPerSample / 8 * ChannelCount;
 
-
 		/// <summary>
 		/// Gets a value indicating if the audio stream is active.
 		/// </summary>
 		public bool Active => audioSource?.RecordingState == RecordState.Recording;
 
-
 		void Init ()
 		{
-			Stop (); //just in case
+			Stop (); // just in case
 
 			audioSource = new AudioRecord (
 				DefaultDevice,
@@ -90,7 +85,6 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
 		/// <summary>
 		/// Starts the audio stream.
 		/// </summary>
@@ -100,7 +94,7 @@ namespace Plugin.AudioRecorder
 			{
 				if (!Active)
 				{
-					//not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
+					// not sure this does anything or if should be here... inherited via copied code ¯\_(ツ)_/¯
 					Android.OS.Process.SetThreadPriority (Android.OS.ThreadPriority.UrgentAudio);
 
 					Init ();
@@ -123,7 +117,6 @@ namespace Plugin.AudioRecorder
 			}
 		}
 
-
 		/// <summary>
 		/// Stops the audio stream.
 		/// </summary>
@@ -136,14 +129,13 @@ namespace Plugin.AudioRecorder
 
 				OnActiveChanged?.Invoke (this, false);
 			}
-			else //just in case
+			else // just in case
 			{
 				audioSource?.Release ();
 			}
 
 			return Task.FromResult (true);
 		}
-
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AudioStream"/> class.
@@ -165,7 +157,6 @@ namespace Plugin.AudioRecorder
 			this.audioFormat = audioFormat;
 		}
 
-
 		/// <summary>
 		/// Record from the microphone and broadcast the buffer.
 		/// </summary>
@@ -181,7 +172,7 @@ namespace Plugin.AudioRecorder
 			{
 				try
 				{
-					//not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
+					// not sure if this is even a good idea, but we'll try to allow a single bad read, and past that shut it down
 					if (readFailureCount > 1)
 					{
 						Debug.WriteLine ("AudioStream.Record(): Multiple read failures detected, stopping stream");
@@ -189,9 +180,9 @@ namespace Plugin.AudioRecorder
 						break;
 					}
 
-					readResult = audioSource.Read (data, 0, bufferSize); //this can block if there are no bytes to read
+					readResult = audioSource.Read (data, 0, bufferSize); // this can block if there are no bytes to read
 
-					//readResult should == the # bytes read, except a few special cases
+					// readResult should == the # bytes read, except a few special cases
 					if (readResult > 0)
 					{
 						readFailureCount = 0;
@@ -224,6 +215,14 @@ namespace Plugin.AudioRecorder
 					OnException?.Invoke (this, ex);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Flushes any audio bytes in memory but not yet broadcast out to any listeners.
+		/// </summary>
+		public void Flush ()
+		{
+			// not needed for this implementation
 		}
 	}
 }

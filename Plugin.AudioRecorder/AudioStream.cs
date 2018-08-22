@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 namespace Plugin.AudioRecorder
@@ -28,6 +28,11 @@ namespace Plugin.AudioRecorder
 		}
 
 		public Task Stop ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public void Flush ()
 		{
 			throw new NotImplementedException ();
 		}
