@@ -1,3 +1,4 @@
+using AVFoundation;
 using Plugin.AudioRecorder;
 using System;
 using System.Threading.Tasks;
@@ -12,8 +13,8 @@ namespace Blank
 
 		public ViewController (IntPtr handle) : base (handle)
 		{
-			// this controls whether the library will attempt to force the shared AVAudioSession into recording mode, and then reset it after recording completes
-			AudioRecorderService.ConfigureAVAudioSession = true;
+			// this controls whether the library will attempt to set the shared AVAudioSession category, and then reset it after recording completes
+			AudioRecorderService.RequestAVAudioSessionCategory (AVAudioSessionCategory.PlayAndRecord);
 		}
 
 		public override void ViewDidLoad ()
