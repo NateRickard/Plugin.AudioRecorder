@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using UIKit;
 
-namespace Blank
+namespace AudioRecord.iOS
 {
 	public partial class ViewController : UIViewController
     {
