@@ -45,7 +45,7 @@ namespace Plugin.AudioRecorder
 
 			if (audioLength > -1)
 			{
-				writer.Write (audioLength + 36); // 36 + subchunk 2 size (data size)
+				writer.Write ((Int32)(audioLength - 8)); // Size of the overall file - 8 bytes, in bytes (32-bit integer). 
 			}
 			else
 			{
@@ -71,7 +71,7 @@ namespace Plugin.AudioRecorder
 			writer.Write (Encoding.UTF8.GetBytes ("data"));
 
 			//subchunk 2 (data) size
-			writer.Write (audioLength);
+			writer.Write (audioLength-44);
 		}
 
 		// Adapted from http://stackoverflow.com/questions/5800649/detect-silence-when-recording
