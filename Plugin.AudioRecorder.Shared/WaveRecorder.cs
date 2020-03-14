@@ -10,10 +10,17 @@ namespace Plugin.AudioRecorder
 	{
 		string audioFilePath;
 		FileStream fileStream;
+		MemoryStream memoryStream;
 		StreamWriter streamWriter;
 		BinaryWriter writer;
 		int byteCount;
 		IAudioStream audioStream;
+
+		/// <summary>
+		/// Gets/sets a value indicating if the <see cref="WaveRecorder"/> should write audio data to a file.
+		/// </summary>
+		/// <remarks>Defaults to <c>true</c></remarks>
+		public bool WriteAudioDataToFile { get; set; } = true;
 
 		/// <summary>
 		/// Starts recording WAVE format audio from the audio stream.
@@ -38,8 +45,16 @@ namespace Plugin.AudioRecorder
 				audioFilePath = filePath;
 				audioStream = stream;
 
-				fileStream = new FileStream (filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-				streamWriter = new StreamWriter (fileStream);
+				if (WriteAudioDataToFile)
+				{
+					fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+					streamWriter = new StreamWriter(fileStream);
+				}
+				else
+				{
+					memoryStream = new MemoryStream();
+					streamWriter = new StreamWriter(memoryStream);
+				}
 				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
 
 				byteCount = 0;
@@ -68,6 +83,15 @@ namespace Plugin.AudioRecorder
 		{
 			//return a new stream to the same audio file, in Read mode
 			return new FileStream (audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		}
+
+		/// <summary>
+		/// Gets a new <see cref="Stream"/> to the audio data in readonly mode.
+		/// </summary>
+		/// <returns>A <see cref="Stream"/> object that can be used to read the audio memory from the beginning.</returns>
+		public Stream GetAudioMemoryStream()
+		{
+			return memoryStream;
 		}
 
 		void StreamActiveChanged (object sender, bool active)
@@ -121,6 +145,7 @@ namespace Plugin.AudioRecorder
 					writer.Dispose (); //this should properly close/dispose the underlying stream as well
 					writer = null;
 					fileStream = null;
+					memoryStream = null;
 					streamWriter = null;
 				}
 

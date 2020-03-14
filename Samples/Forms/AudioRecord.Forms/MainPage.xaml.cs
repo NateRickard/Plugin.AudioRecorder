@@ -20,9 +20,14 @@ namespace AudioRecord.Forms
 				TotalAudioTimeout = TimeSpan.FromSeconds (15),
 				AudioSilenceTimeout = TimeSpan.FromSeconds (2)
 			};
+			recorder.AudioLevelUpdated += Recorder_AudioLevelUpdated;
 
 			player = new AudioPlayer ();
 			player.FinishedPlaying += Player_FinishedPlaying;
+		}
+
+		public void Recorder_AudioLevelUpdated (object sender, float level)
+		{
 		}
 
 		async void Record_Clicked (object sender, EventArgs e)

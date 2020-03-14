@@ -82,6 +82,18 @@ namespace Plugin.AudioRecorder
 		/// <remarks>This event will be raised on a background thread to allow for any further processing needed.  The audio file will be <c>null</c> in the case that no audio was recorded.</remarks>
 		public event EventHandler<string> AudioInputReceived;
 
+		/// <summary>
+		/// This event is raised when the most recent audio level has been calculated.
+		/// </summary>
+		/// <remarks>This event will be raised on a background thread to allow for any further processing needed.  The audio level will be <c>0.0f</c> in the case that no audio was recorded.</remarks>
+		public event EventHandler<float> AudioLevelUpdated;
+
+		/// <summary>
+		/// Gets/sets a value indicating if the <see cref="AudioRecorderService"/> should write audio data to a file.
+		/// </summary>
+		/// <remarks>Defaults to <c>true</c></remarks>
+		public bool WriteAudioDataToFile { get; set; } = true;
+
 		partial void Init ();
 
 		/// <summary>
@@ -145,6 +157,8 @@ namespace Plugin.AudioRecorder
 		void AudioStream_OnBroadcast (object sender, byte [] bytes)
 		{
 			var level = AudioFunctions.CalculateLevel (bytes);
+
+			AudioLevelUpdated?.Invoke(this, level);
 
 			if (level < NearZero && !audioDetected) // discard any initial 0s so we don't jump the gun on timing out
 			{
@@ -247,7 +261,9 @@ namespace Plugin.AudioRecorder
 
 				if (recorder == null)
 				{
-					recorder = new WaveRecorder ();
+					recorder = new WaveRecorder {
+						WriteAudioDataToFile = WriteAudioDataToFile
+					};
 				}
 			}
 			catch (Exception ex)
@@ -263,6 +279,15 @@ namespace Plugin.AudioRecorder
 		public string GetAudioFilePath ()
 		{
 			return audioDetected ? FilePath : null;
+		}
+
+		/// <summary>
+		/// Gets a new <see cref="Stream"/> to the audio data in readonly mode.
+		/// </summary>
+		/// <returns>A <see cref="Stream"/> object that can be used to read the audio memory from the beginning.</returns>
+		public Stream GetAudioMemoryStream()
+		{
+			return recorder.GetAudioMemoryStream();
 		}
 	}
 }
