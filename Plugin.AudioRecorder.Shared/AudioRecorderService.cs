@@ -21,6 +21,7 @@ namespace Plugin.AudioRecorder
 		DateTime? silenceTime;
 		DateTime? startTime;
 		TaskCompletionSource<string> recordTask;
+		FileStream fileStream;
 
 		/// <summary>
 		/// Gets the details of the underlying audio stream.
@@ -95,13 +96,20 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Starts recording audio.
 		/// </summary>
+		/// <param name="recordStream"><c>null</c> (default) optional stream to write audio data to, if null, a file will be created.
 		/// <returns>A <see cref="Task"/> that will complete when recording is finished.  
 		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
-		public async Task<Task<string>> StartRecording ()
+		/// <param name="recordStream"></param>
+		public async Task<Task<string>> StartRecording (Stream recordStream = null)
 		{
-			if (FilePath == null)
+			if (recordStream == null)
 			{
-				FilePath = await GetDefaultFilePath ();
+				if (FilePath == null)
+				{
+					FilePath = await GetDefaultFilePath ();
+				}
+				fileStream = new FileStream (FilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+				recordStream = fileStream; 
 			}
 
 			ResetAudioDetection ();
@@ -109,7 +117,7 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, FilePath);
+			await recorder.StartRecorder (audioStream, recordStream);
 
 			AudioStreamDetails = new AudioStreamDetails
 			{
@@ -132,7 +140,8 @@ namespace Plugin.AudioRecorder
 		/// <returns>A <see cref="Stream"/> object that can be used to read the audio file from the beginning.</returns>
 		public Stream GetAudioFileStream ()
 		{
-			return recorder.GetAudioFileStream ();
+			//return a new stream to the same audio file, in Read mode
+			return new FileStream (FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
 		void ResetAudioDetection ()
@@ -216,10 +225,11 @@ namespace Plugin.AudioRecorder
 				Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
 
+			fileStream?.Dispose();
 			OnRecordingStopped ();
 
 			var returnedFilePath = GetAudioFilePath ();
-			// complete the recording Task for anthing waiting on this
+			// complete the recording Task for anything waiting on this
 			recordTask.TrySetResult (returnedFilePath);
 
 			if (continueProcessing)

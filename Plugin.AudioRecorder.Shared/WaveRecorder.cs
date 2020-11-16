@@ -8,9 +8,6 @@ namespace Plugin.AudioRecorder
 {
 	internal class WaveRecorder : IDisposable
 	{
-		string audioFilePath;
-		FileStream fileStream;
-		StreamWriter streamWriter;
 		BinaryWriter writer;
 		int byteCount;
 		IAudioStream audioStream;
@@ -19,10 +16,15 @@ namespace Plugin.AudioRecorder
 		/// Starts recording WAVE format audio from the audio stream.
 		/// </summary>
 		/// <param name="stream">A <see cref="IAudioStream"/> that provides the audio data.</param>
-		/// <param name="filePath">The full path of the file to record audio to.</param>
-		public async Task StartRecorder (IAudioStream stream, string filePath)
+		/// <param name="recordStream">The stream the audio will be written to.</param>
+		public async Task StartRecorder (IAudioStream stream, Stream recordStream)
 		{
 			if (stream == null)
+			{
+				throw new ArgumentNullException (nameof (stream));
+			}
+
+			if (recordStream == null)
 			{
 				throw new ArgumentNullException (nameof (stream));
 			}
@@ -34,13 +36,9 @@ namespace Plugin.AudioRecorder
 				{
 					await audioStream.Stop ();
 				}
-
-				audioFilePath = filePath;
+				
 				audioStream = stream;
-
-				fileStream = new FileStream (filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-				streamWriter = new StreamWriter (fileStream);
-				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
+				writer = new BinaryWriter (recordStream, Encoding.UTF8, true);
 
 				byteCount = 0;
 				audioStream.OnBroadcast += OnStreamBroadcast;
@@ -59,17 +57,7 @@ namespace Plugin.AudioRecorder
 				throw;
 			}
 		}
-
-		/// <summary>
-		/// Gets a new <see cref="Stream"/> to the audio file in readonly mode.
-		/// </summary>
-		/// <returns>A <see cref="Stream"/> object that can be used to read the audio file from the beginning.</returns>
-		public Stream GetAudioFileStream ()
-		{
-			//return a new stream to the same audio file, in Read mode
-			return new FileStream (audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-		}
-
+		
 		void StreamActiveChanged (object sender, bool active)
 		{
 			if (!active)
@@ -82,7 +70,7 @@ namespace Plugin.AudioRecorder
 		{
 			try
 			{
-				if (writer != null && streamWriter != null)
+				if (writer != null)
 				{
 					writer.Write (bytes);
 					byteCount += bytes.Length;
@@ -111,7 +99,7 @@ namespace Plugin.AudioRecorder
 
 				if (writer != null)
 				{
-					if (streamWriter.BaseStream.CanWrite)
+					if (writer.BaseStream.CanWrite && writer.BaseStream.CanSeek)
 					{
 						//now that audio is finished recording, write a WAV/RIFF header at the beginning of the file
 						writer.Seek (0, SeekOrigin.Begin);
@@ -120,8 +108,6 @@ namespace Plugin.AudioRecorder
 
 					writer.Dispose (); //this should properly close/dispose the underlying stream as well
 					writer = null;
-					fileStream = null;
-					streamWriter = null;
 				}
 
 				audioStream = null;
