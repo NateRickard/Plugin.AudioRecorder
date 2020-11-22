@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.Build.NoTargets/2.0.1">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <NuspecFile>Plugin.AudioRecorder.nuspec</NuspecFile>
+	    <NuspecProperties>$(NuspecProperties);configuration=$(Configuration)</NuspecProperties>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Plugin.AudioRecorder.Android\Plugin.AudioRecorder.Android.csproj" />
+      <ProjectReference Include="..\Plugin.AudioRecorder.iOS\Plugin.AudioRecorder.iOS.csproj" />
+      <ProjectReference Include="..\Plugin.AudioRecorder.UWP\Plugin.AudioRecorder.UWP.csproj" />
+      <ProjectReference Include="..\Plugin.AudioRecorder\Plugin.AudioRecorder.csproj" />
+    </ItemGroup>
+</Project>
