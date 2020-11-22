@@ -39,19 +39,19 @@
 
   <files>
     <!-- Cross-platform reference assemblies -->
-    <file src="Plugin.AudioRecorder\bin\Release\netstandard2.0\Plugin.AudioRecorder.dll" target="lib\netstandard2.0\Plugin.AudioRecorder.dll" />
-    <file src="Plugin.AudioRecorder\bin\Release\netstandard2.0\Plugin.AudioRecorder.pdb" target="lib\netstandard2.0\Plugin.AudioRecorder.pdb" />
+    <file src="..\Plugin.AudioRecorder\bin\$configuration$\netstandard2.0\Plugin.AudioRecorder.dll" target="lib\netstandard2.0\Plugin.AudioRecorder.dll" />
+    <file src="..\Plugin.AudioRecorder\bin\$configuration$\netstandard2.0\Plugin.AudioRecorder.pdb" target="lib\netstandard2.0\Plugin.AudioRecorder.pdb" />
 
     <!-- iOS reference assemblies -->
-    <file src="Plugin.AudioRecorder.iOS\bin\Release\Plugin.AudioRecorder.dll" target="lib\xamarinios10\Plugin.AudioRecorder.dll" />
-    <file src="Plugin.AudioRecorder.iOS\bin\Release\Plugin.AudioRecorder.pdb" target="lib\xamarinios10\Plugin.AudioRecorder.pdb" />
+    <file src="..\Plugin.AudioRecorder.iOS\bin\$configuration$\Plugin.AudioRecorder.dll" target="lib\xamarinios10\Plugin.AudioRecorder.dll" />
+    <file src="..\Plugin.AudioRecorder.iOS\bin\$configuration$\Plugin.AudioRecorder.pdb" target="lib\xamarinios10\Plugin.AudioRecorder.pdb" />
 
     <!-- Android reference assemblies -->
-    <file src="Plugin.AudioRecorder.Android\bin\Release\Plugin.AudioRecorder.dll" target="lib\monoandroid81\Plugin.AudioRecorder.dll" />
-    <file src="Plugin.AudioRecorder.Android\bin\Release\Plugin.AudioRecorder.pdb" target="lib\monoandroid81\Plugin.AudioRecorder.pdb" />
+    <file src="..\Plugin.AudioRecorder.Android\bin\$configuration$\Plugin.AudioRecorder.dll" target="lib\monoandroid81\Plugin.AudioRecorder.dll" />
+    <file src="..\Plugin.AudioRecorder.Android\bin\$configuration$\Plugin.AudioRecorder.pdb" target="lib\monoandroid81\Plugin.AudioRecorder.pdb" />
 
     <!-- UWP reference assemblies -->
-    <file src="Plugin.AudioRecorder.UWP\bin\Release\Plugin.AudioRecorder.dll" target="lib\UAP10\Plugin.AudioRecorder.dll" />
-    <file src="Plugin.AudioRecorder.UWP\bin\Release\Plugin.AudioRecorder.pdb" target="lib\UAP10\Plugin.AudioRecorder.pdb" />
+    <file src="..\Plugin.AudioRecorder.UWP\bin\$configuration$\Plugin.AudioRecorder.dll" target="lib\UAP10\Plugin.AudioRecorder.dll" />
+    <file src="..\Plugin.AudioRecorder.UWP\bin\$configuration$\Plugin.AudioRecorder.pdb" target="lib\UAP10\Plugin.AudioRecorder.pdb" />
   </files>
 </package>
