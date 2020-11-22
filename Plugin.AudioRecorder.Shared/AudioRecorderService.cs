@@ -96,11 +96,11 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Starts recording audio.
 		/// </summary>
-		/// <param name="recordStream"><c>null</c> (default) optional stream to write audio data to, if null, a file will be created.
+		/// <param name="recordStream"><c>null</c> (default) Optional stream to write audio data to, if null, a file will be created.</param>
+		/// <param name="writeHeaders"><c>false</c> (default) Set to true, to write WAV headers after recording. Note that stream should be seekable.</param>
 		/// <returns>A <see cref="Task"/> that will complete when recording is finished.  
 		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
-		/// <param name="recordStream"></param>
-		public async Task<Task<string>> StartRecording (Stream recordStream = null)
+		public async Task<Task<string>> StartRecording (Stream recordStream = null, bool writeHeaders = false)
 		{
 			if (recordStream == null)
 			{
@@ -109,7 +109,8 @@ namespace Plugin.AudioRecorder
 					FilePath = await GetDefaultFilePath ();
 				}
 				fileStream = new FileStream (FilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-				recordStream = fileStream; 
+				recordStream = fileStream;
+				writeHeaders = true;
 			}
 
 			ResetAudioDetection ();
@@ -117,7 +118,7 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, recordStream);
+			await recorder.StartRecorder (audioStream, recordStream, writeHeaders);
 
 			AudioStreamDetails = new AudioStreamDetails
 			{

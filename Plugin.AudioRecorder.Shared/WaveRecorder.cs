@@ -11,13 +11,15 @@ namespace Plugin.AudioRecorder
 		BinaryWriter writer;
 		int byteCount;
 		IAudioStream audioStream;
+		bool writeHeadersToStream;
 
 		/// <summary>
 		/// Starts recording WAVE format audio from the audio stream.
 		/// </summary>
 		/// <param name="stream">A <see cref="IAudioStream"/> that provides the audio data.</param>
 		/// <param name="recordStream">The stream the audio will be written to.</param>
-		public async Task StartRecorder (IAudioStream stream, Stream recordStream)
+		/// <param name="writeHeaders"><c>false</c> (default) Write WAV headers to stream at the end of recording.</param>
+		public async Task StartRecorder (IAudioStream stream, Stream recordStream, bool writeHeaders = false)
 		{
 			if (stream == null)
 			{
@@ -26,8 +28,10 @@ namespace Plugin.AudioRecorder
 
 			if (recordStream == null)
 			{
-				throw new ArgumentNullException (nameof (stream));
+				throw new ArgumentNullException (nameof (recordStream));
 			}
+
+			writeHeadersToStream = writeHeaders;
 
 			try
 			{
@@ -99,7 +103,7 @@ namespace Plugin.AudioRecorder
 
 				if (writer != null)
 				{
-					if (writer.BaseStream.CanWrite && writer.BaseStream.CanSeek)
+					if (writeHeadersToStream && writer.BaseStream.CanWrite && writer.BaseStream.CanSeek)
 					{
 						//now that audio is finished recording, write a WAV/RIFF header at the beginning of the file
 						writer.Seek (0, SeekOrigin.Begin);
