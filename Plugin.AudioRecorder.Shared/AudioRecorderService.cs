@@ -97,7 +97,7 @@ namespace Plugin.AudioRecorder
 		/// Starts recording audio.
 		/// </summary>
 		/// <param name="recordStream"><c>null</c> (default) Optional stream to write audio data to, if null, a file will be created.</param>
-		/// <param name="writeHeaders"><c>false</c> (default) Set to true, to write WAV headers after recording. Note that stream should be seekable.</param>
+		/// <param name="writeHeaders"><c>false</c> (default) Set to true, to write WAV headers to recordStream after recording. Requires a seekable stream.</param>
 		/// <returns>A <see cref="Task"/> that will complete when recording is finished.  
 		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
 		public async Task<Task<string>> StartRecording (Stream recordStream = null, bool writeHeaders = false)
