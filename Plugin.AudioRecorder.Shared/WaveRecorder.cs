@@ -9,8 +9,7 @@ namespace Plugin.AudioRecorder
 	internal class WaveRecorder : IDisposable
 	{
 		string audioFilePath;
-		FileStream fileStream;
-		StreamWriter streamWriter;
+		MemoryStream memoryAudioStream;
 		BinaryWriter writer;
 		int byteCount;
 		IAudioStream audioStream;
@@ -38,9 +37,8 @@ namespace Plugin.AudioRecorder
 				audioFilePath = filePath;
 				audioStream = stream;
 
-				fileStream = new FileStream (filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-				streamWriter = new StreamWriter (fileStream);
-				writer = new BinaryWriter (streamWriter.BaseStream, Encoding.UTF8);
+				memoryAudioStream = new MemoryStream();
+				writer = new BinaryWriter (memoryAudioStream, Encoding.UTF8);
 
 				byteCount = 0;
 				audioStream.OnBroadcast += OnStreamBroadcast;
@@ -82,7 +80,7 @@ namespace Plugin.AudioRecorder
 		{
 			try
 			{
-				if (writer != null && streamWriter != null)
+				if (writer != null)
 				{
 					writer.Write (bytes);
 					byteCount += bytes.Length;
@@ -109,19 +107,16 @@ namespace Plugin.AudioRecorder
 					audioStream.OnActiveChanged -= StreamActiveChanged;
 				}
 
-				if (writer != null)
+				using (var fileStream = new FileStream (audioFilePath, FileMode.Create, FileAccess.Write))
 				{
-					if (streamWriter.BaseStream.CanWrite)
+					using (var fileWriter = new BinaryWriter (fileStream, Encoding.UTF8))
 					{
 						//now that audio is finished recording, write a WAV/RIFF header at the beginning of the file
-						writer.Seek (0, SeekOrigin.Begin);
-						AudioFunctions.WriteWavHeader (writer, audioStream.ChannelCount, audioStream.SampleRate, audioStream.BitsPerSample, byteCount);
+						AudioFunctions.WriteWavHeader (fileWriter, audioStream.ChannelCount, audioStream.SampleRate,
+						audioStream.BitsPerSample, byteCount);
+						memoryAudioStream.Seek (0, SeekOrigin.Begin);
+						memoryAudioStream.CopyTo (fileStream);
 					}
-
-					writer.Dispose (); //this should properly close/dispose the underlying stream as well
-					writer = null;
-					fileStream = null;
-					streamWriter = null;
 				}
 
 				audioStream = null;
