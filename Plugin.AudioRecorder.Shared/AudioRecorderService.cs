@@ -21,6 +21,7 @@ namespace Plugin.AudioRecorder
 		DateTime? silenceTime;
 		DateTime? startTime;
 		TaskCompletionSource<string> recordTask;
+		FileStream fileStream;
 
 		/// <summary>
 		/// Gets the details of the underlying audio stream.
@@ -75,6 +76,12 @@ namespace Plugin.AudioRecorder
 		/// </summary>
 		/// <remarks>Defaults to .15.  Value should be between 0 and 1.</remarks>
 		public float SilenceThreshold { get; set; } = .15f;
+		
+		/// <summary>
+		/// Gets/sets a value indicating if headers will be written to the file/stream.
+		/// </summary>
+		/// <remarks>Defaults to <c>true</c></remarks>
+		public bool WriteHeaders { get; set; } = true;
 
 		/// <summary>
 		/// This event is raised when audio recording is complete and delivers a full filepath to the recorded audio file.
@@ -95,13 +102,20 @@ namespace Plugin.AudioRecorder
 		/// <summary>
 		/// Starts recording audio.
 		/// </summary>
+		/// <param name="recordStream"><c>null</c> (default) Optional stream to write audio data to, if null, a file will be created.</param>
+		/// <param name="writeHeaders"><c>false</c> (default) Set to true, to write WAV headers to recordStream after recording. Requires a seekable stream.</param>
 		/// <returns>A <see cref="Task"/> that will complete when recording is finished.  
 		/// The task result will be the path to the recorded audio file, or null if no audio was recorded.</returns>
-		public async Task<Task<string>> StartRecording ()
+		public async Task<Task<string>> StartRecording (Stream recordStream = null)
 		{
-			if (FilePath == null)
+			if (recordStream == null)
 			{
-				FilePath = await GetDefaultFilePath ();
+				if (FilePath == null)
+				{
+					FilePath = await GetDefaultFilePath ();
+				}
+				fileStream = new FileStream (FilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+				recordStream = fileStream;
 			}
 
 			ResetAudioDetection ();
@@ -109,7 +123,7 @@ namespace Plugin.AudioRecorder
 
 			InitializeStream (PreferredSampleRate);
 
-			await recorder.StartRecorder (audioStream, FilePath);
+			await recorder.StartRecorder (audioStream, recordStream, WriteHeaders);
 
 			AudioStreamDetails = new AudioStreamDetails
 			{
@@ -132,7 +146,8 @@ namespace Plugin.AudioRecorder
 		/// <returns>A <see cref="Stream"/> object that can be used to read the audio file from the beginning.</returns>
 		public Stream GetAudioFileStream ()
 		{
-			return recorder.GetAudioFileStream ();
+			//return a new stream to the same audio file, in Read mode
+			return new FileStream (FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
 		void ResetAudioDetection ()
@@ -216,10 +231,11 @@ namespace Plugin.AudioRecorder
 				Debug.WriteLine ("Error in StopRecording: {0}", ex);
 			}
 
+			fileStream?.Dispose();
 			OnRecordingStopped ();
 
 			var returnedFilePath = GetAudioFilePath ();
-			// complete the recording Task for anthing waiting on this
+			// complete the recording Task for anything waiting on this
 			recordTask.TrySetResult (returnedFilePath);
 
 			if (continueProcessing)
